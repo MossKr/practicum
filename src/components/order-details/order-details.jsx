@@ -1,9 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 import styles from "./order-details.module.css";
 import img from "../../assets/images/check.svg";
 
-function OrderDetails({ orderNumber }) {
+function OrderDetails() {
     return (
         <div className={styles.modalBody}>
             <p className={`${styles.numberOrder} text text_type_digits-large`}>
@@ -23,8 +22,5 @@ function OrderDetails({ orderNumber }) {
     );
 }
 
-OrderDetails.propTypes = {
-    orderNumber: PropTypes.string.isRequired,
-};
 
 export default React.memo(OrderDetails);
