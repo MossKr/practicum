@@ -1,6 +1,5 @@
 import React from "react";
 import { IngredientType } from '../../../utils/types';
-import PropTypes from "prop-types";
 import styles from "./details.module.css";
 
 const IngredientDetails = React.memo(function IngredientDetails({ item }) {
