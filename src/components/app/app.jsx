@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./styles.module.css";
 import AppHeader from "../app-header/app-header";
 import BurgerIngredients from "../burger-ingredients/burger-ingredients";
@@ -7,33 +7,30 @@ import BurgerConstructor from "../burger-constructor/burger-constructor";
 const API_URL = "https://norma.nomoreparties.space/api";
 
 function App() {
-    const [ingredients, setIngredients] = React.useState([]);
-    const [isLoading, setIsLoading] = React.useState(true);
-    const [error, setError] = React.useState(null);
+    const [ingredients, setIngredients] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    React.useEffect(function () {
-        function fetchIngredients() {
-            fetch(`${API_URL}/ingredients`)
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error(`Ошибка: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(function (result) {
-                    if (result.success) {
-                        setIngredients(result.data);
-                    }
-                    setIsLoading(false);
-                })
-                .catch(function (e) {
-                    setError(e.message);
-                    setIsLoading(false);
-                });
+    const fetchIngredients = useCallback(async () => {
+        try {
+            const response = await fetch(`${API_URL}/ingredients`);
+            if (!response.ok) {
+                throw new Error(`Ошибка: ${response.status}`);
+            }
+            const result = await response.json();
+            if (result.success) {
+                setIngredients(result.data);
+            }
+        } catch (e) {
+            setError(e.message);
+        } finally {
+            setIsLoading(false);
         }
-
-        fetchIngredients();
     }, []);
+
+    useEffect(() => {
+        fetchIngredients();
+    }, [fetchIngredients]);
 
     return (
         <>
@@ -41,10 +38,18 @@ function App() {
             <main>
                 <section className={styles.container}>
                     <div className={`${styles.block} ${styles.firstBlock}`}>
-                        <BurgerIngredients ingredients={ingredients} isLoading={isLoading} error={error} />
+                        <BurgerIngredients
+                            ingredients={ingredients}
+                            isLoading={isLoading}
+                            error={error}
+                        />
                     </div>
                     <div className={`${styles.block} ${styles.secondBlock}`}>
-                        <BurgerConstructor ingredients={ingredients} isLoading={isLoading} error={error} />
+                        <BurgerConstructor
+                            ingredients={ingredients}
+                            isLoading={isLoading}
+                            error={error}
+                        />
                     </div>
                 </section>
             </main>

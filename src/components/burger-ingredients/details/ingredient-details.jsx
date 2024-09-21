@@ -1,43 +1,34 @@
 import React from "react";
+import { IngredientType } from '../../../utils/types';
 import PropTypes from "prop-types";
 import styles from "./details.module.css";
 
-function IngredientDetails({ item }) {
+const IngredientDetails = React.memo(function IngredientDetails({ item }) {
     const details = [
-        { label: "Калории,ккал.", value: item.calories },
-        { label: "Белки,г.", value: item.proteins },
-        { label: "Жиры,г.", value: item.fat },
-        { label: "Углеводы,г.", value: item.carbohydrates },
+        { label: "Калории, ккал", value: item.calories },
+        { label: "Белки, г", value: item.proteins },
+        { label: "Жиры, г", value: item.fat },
+        { label: "Углеводы, г", value: item.carbohydrates },
     ];
-
-    const textTitleName = "text text_type_main-default text_color_inactive";
-    const textDetails = "text text_type_digits-default text_color_inactive";
 
     return (
         <div className={styles.modalBody}>
             <img src={item.image_large} alt={item.name} className={styles.largeImg} />
             <h3 className={`text text_type_main-medium mt-4 mb-8 ${styles.itemName}`}>{item.name}</h3>
-            <div className={styles.details}>
+            <dl className={styles.details}>
                 {details.map(({ label, value }) => (
-                    <span key={label}>
-                        <p className={textTitleName}>{label}</p>
-                        <p className={textDetails}>{value}</p>
-                    </span>
+                    <div key={label} className={styles.detailItem}>
+                        <dt className="text text_type_main-default text_color_inactive">{label}</dt>
+                        <dd className="text text_type_digits-default text_color_inactive">{value}</dd>
+                    </div>
                 ))}
-            </div>
+            </dl>
         </div>
     );
-}
+});
 
 IngredientDetails.propTypes = {
-    item: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-        image_large: PropTypes.string.isRequired,
-        calories: PropTypes.number.isRequired,
-        proteins: PropTypes.number.isRequired,
-        fat: PropTypes.number.isRequired,
-        carbohydrates: PropTypes.number.isRequired,
-    }).isRequired,
+    item: IngredientType.isRequired,
 };
 
 export default IngredientDetails;

@@ -1,6 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Tab } from "@ya.praktikum/react-developer-burger-ui-components";
+import styles from "../ingredients.module.css"
+
+const { tabsRow } = styles;
 
 function TabSort(props) {
     function onClickBuns() {
@@ -16,7 +19,7 @@ function TabSort(props) {
     }
 
     return (
-        <div style={{ display: "flex" }}>
+        <div className={tabsRow}>
             <Tab value="buns" active={props.activeTab === "buns"} onClick={onClickBuns}>
                 Булки
             </Tab>
