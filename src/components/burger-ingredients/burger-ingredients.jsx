@@ -11,6 +11,7 @@ function BurgerIngredients() {
     const dispatch = useDispatch();
     const ingredients = useSelector(selectIngredients);
     const status = useSelector(selectIngredientsStatus);
+    const error = useSelector(selectIngredientsError);
     const constructorItems = useSelector(selectConstructorItems);
 
     const [activeTab, setActiveTab] = useState("buns");
@@ -29,20 +30,22 @@ function BurgerIngredients() {
             return { buns: [], sauces: [], mains: [] };
         }
         return {
-            buns: ingredients.filter(item => item.type === "bun"),
-            sauces: ingredients.filter(item => item.type === "sauce"),
-            mains: ingredients.filter(item => item.type === "main")
+            buns: ingredients.filter((item) => item.type === "bun"),
+            sauces: ingredients.filter((item) => item.type === "sauce"),
+            mains: ingredients.filter((item) => item.type === "main"),
         };
     }, [ingredients]);
 
     const ingredientCounts = useMemo(() => {
         const counts = {};
-        if (constructorItems.bun) {
-            counts[constructorItems.bun._id] = 2; 
+        if (constructorItems && constructorItems.bun) {
+            counts[constructorItems.bun._id] = 2;
         }
-        constructorItems.ingredients.forEach(item => {
-            counts[item._id] = (counts[item._id] || 0) + 1;
-        });
+        if (constructorItems && constructorItems.ingredients) {
+            constructorItems.ingredients.forEach((item) => {
+                counts[item._id] = (counts[item._id] || 0) + 1;
+            });
+        }
         return counts;
     }, [constructorItems]);
 
@@ -56,35 +59,27 @@ function BurgerIngredients() {
         dispatch(setCurrentIngredient(ingredient));
     };
 
- 
+    if (status === "loading") {
+        return <div>Загрузка...</div>;
+    }
+
+    if (status === "failed") {
+        return <div>Ошибка: {error}</div>;
+    }
+
     return (
         <section>
             <h1 className="text text_type_main-large pt-10 pb-5">Соберите бургер</h1>
             <TabSort activeTab={activeTab} setActiveTab={handleTabClick} />
             <div className={styles.customScroll}>
                 <div ref={bunsRef}>
-                    <IngredientCategory 
-                        title="Булки" 
-                        items={categoriesIngredients.buns} 
-                        onIngredientClick={handleIngredientClick}
-                        ingredientCounts={ingredientCounts}
-                    />
+                    <IngredientCategory title="Булки" items={categoriesIngredients.buns} onIngredientClick={handleIngredientClick} ingredientCounts={ingredientCounts} />
                 </div>
                 <div ref={saucesRef}>
-                    <IngredientCategory 
-                        title="Соусы" 
-                        items={categoriesIngredients.sauces} 
-                        onIngredientClick={handleIngredientClick}
-                        ingredientCounts={ingredientCounts}
-                    />
+                    <IngredientCategory title="Соусы" items={categoriesIngredients.sauces} onIngredientClick={handleIngredientClick} ingredientCounts={ingredientCounts} />
                 </div>
                 <div ref={mainsRef}>
-                    <IngredientCategory 
-                        title="Начинки" 
-                        items={categoriesIngredients.mains} 
-                        onIngredientClick={handleIngredientClick}
-                        ingredientCounts={ingredientCounts}
-                    />
+                    <IngredientCategory title="Начинки" items={categoriesIngredients.mains} onIngredientClick={handleIngredientClick} ingredientCounts={ingredientCounts} />
                 </div>
             </div>
         </section>

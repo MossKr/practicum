@@ -1,7 +1,7 @@
 import { createSlice, createSelector } from "@reduxjs/toolkit";
+import { v4 as uuidv4 } from "uuid";
 
 const constructorSlice = createSlice({
-    
     name: "lego",
     initialState: {
         bun: null,
@@ -10,15 +10,14 @@ const constructorSlice = createSlice({
     reducers: {
         addIngredient: (state, action) => {
             if (action.payload.type === "bun") {
-                state.bun = action.payload; //bun ? меняем на текущую булку
+                state.bun = action.payload;
             } else {
-                state.ingredients.push({ ...action.payload, uniqueId: Date.now() }); // !bun add в массив с уникальным ID.
+                state.ingredients.push(action.payload);
             }
         },
         removeIngredient: (state, action) => {
-            state.ingredients = state.ingredients.filter((item) => item.uniqueId !== action.payload); 
+            state.ingredients = state.ingredients.filter((item) => item.uniqueId !== action.payload);
         },
-
         moveIngredient: (state, action) => {
             const { dragIndex, hoverIndex } = action.payload;
             const dragItem = state.ingredients[dragIndex];
@@ -28,20 +27,26 @@ const constructorSlice = createSlice({
             state.ingredients = newIngredients;
         },
         clearConstructor: (state) => {
-            //в исходную
             state.bun = null;
             state.ingredients = [];
         },
     },
 });
 
-export const { addIngredient, removeIngredient, moveIngredient, clearConstructor } = constructorSlice.actions;
+export const { removeIngredient, moveIngredient, clearConstructor } = constructorSlice.actions;
 
+
+export const addIngredient = (ingredient) => {
+    if (ingredient.type === "bun") {
+        return constructorSlice.actions.addIngredient(ingredient);
+    } else {
+        return constructorSlice.actions.addIngredient({ ...ingredient, uniqueId: uuidv4() });
+    }
+};
 
 export const selectBun = (state) => state.lego.bun;
 export const selectIngredients = (state) => state.lego.ingredients;
 
-//консоль ругается, возвращаем только, если действительно изменились bun или ingredients.
 export const selectConstructorItems = createSelector([selectBun, selectIngredients], (bun, ingredients) => ({
     bun,
     ingredients,

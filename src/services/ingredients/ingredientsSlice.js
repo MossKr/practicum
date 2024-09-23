@@ -2,14 +2,16 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
 export const fetchIngredients = createAsyncThunk(
-    //CHECKED
     "ingredients/fetchIngredients",
     async (_, { rejectWithValue }) => {
         try {
             const response = await api.getIngredients();
-            return response;
+            if (!response.success || !Array.isArray(response.data)) {
+                return rejectWithValue("Некорректный формат ответа от сервера");
+            }
+            return response.data;
         } catch (error) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.message || "Произошла ошибка при загрузке ингредиентов");
         }
     }
 );
@@ -18,7 +20,7 @@ const ingredientsSlice = createSlice({
     name: "ingredients",
     initialState: {
         items: [],
-        status: "idle", //отсутсвие ошибок, бездействие CHECKED
+        status: "idle",
         error: null,
     },
     reducers: {
@@ -26,7 +28,6 @@ const ingredientsSlice = createSlice({
             state.error = null;
         },
     },
-    //обрабатываем состояния асинхронного действия CHECKED
     extraReducers: (builder) => {
         builder
             .addCase(fetchIngredients.pending, (state) => {
@@ -39,7 +40,7 @@ const ingredientsSlice = createSlice({
             })
             .addCase(fetchIngredients.rejected, (state, action) => {
                 state.status = "failed";
-                state.error = action.payload || "Произошла ошибка при загрузке ингредиентов";
+                state.error = action.payload || "Произошла неизвестная ошибка при загрузке ингредиентов";
             });
     },
 });

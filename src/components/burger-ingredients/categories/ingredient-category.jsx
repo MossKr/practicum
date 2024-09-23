@@ -4,10 +4,10 @@ import PropTypes from "prop-types";
 import IngredientItem from "../item/ingredient-item";
 import styles from "../ingredients.module.css";
 
-const IngredientCategory = React.memo(function IngredientCategory({ 
-    title, 
-    items, 
-    isVisible = true, 
+const IngredientCategory = React.memo(function IngredientCategory({
+    title,
+    items,
+    isVisible = true,
     onIngredientClick,
     ingredientCounts
 }) {
