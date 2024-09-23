@@ -39,6 +39,34 @@
   padding: 15px 32px 10px 0;
 }
 .orderTotal {
-  padding-right: 40px;
+  padding-right: 0px;
   align-content: center;
+}
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #4a4ae8;
+  border-radius: 15px;
+  padding: 30px;
+  transition: all 0.5s ease;
+}
+
+.dropZone:hover {
+  background-color: rgba(76, 76, 255, 0.1);
+}
+.dropIcon {
+  font-size: 32px;
+  color: #4C4CFF;
+  margin-bottom: 8px;
+}
+.draggableItem {
+  display: flex;
+  align-items: center;
+  cursor: move;
+}
+
+.draggableItem > *:first-child {
+  margin-right: 8px; /*figma 24px icon + 8 margin = 32px (x8px) CHECKED*/
 }

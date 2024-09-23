@@ -1,26 +1,60 @@
 import React from "react";
-import { IngredientType } from '../../../utils/types';
+import { useDispatch, useSelector } from "react-redux";
+import { useDrag } from "react-dnd";
+import { IngredientType } from "../../../utils/types";
 import { Counter, CurrencyIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import styles from "../ingredients.module.css";
 import Modal from "../../common/modal/modal";
 import IngredientDetails from "../details/ingredient-details";
 import { useModal } from "../../../hooks/useModal";
+import { setCurrentIngredient, clearCurrentIngredient } from "../../../services/currentIngredient/currentIngredientSlice";
+import { selectBun, selectIngredients } from "../../../services/constructor/constructorSlice";
 
 function IngredientItem({ item }) {
+    const dispatch = useDispatch();
     const { isModalOpen, openModal, closeModal } = useModal();
+    const bun = useSelector(selectBun);
+    const ingredients = useSelector(selectIngredients);
+
+    const [{ isDragging }, dragRef] = useDrag({
+        type: "ingredient",
+        item: { ...item },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
+
+    const count = React.useMemo(() => {
+        if (item.type === "bun") {
+            return bun && bun._id === item._id ? 2 : 0;
+        }
+        return ingredients.filter(ing => ing._id === item._id).length;
+    }, [item, bun, ingredients]);
 
     function handleIngredientClick() {
+        dispatch(setCurrentIngredient(item));
         openModal();
+    }
+
+    function handleCloseModal() {
+        dispatch(clearCurrentIngredient());
+        closeModal();
     }
 
     return (
         <>
-            <div className={styles.ingredientItem} onClick={handleIngredientClick}>
+            <div
+                ref={dragRef}
+                className={`${styles.ingredientItem} ${isDragging ? styles.dragging : ""}`}
+                onClick={handleIngredientClick}
+            >
                 <div className={styles.imageContainer}>
                     <img src={item.image} alt={item.name} className="mb-1 pr-4 pl-4" />
-                    <div className={styles.counterWrapper}>
-                        <Counter count={1} size="default" extraClass="m-1" />
-                    </div>
+                    {count > 0 && (
+                        <div className={styles.counterWrapper}>
+                            <Counter count={count} size="default" extraClass="m-1" />
+                        </div>
+                    )}
                 </div>
                 <span className={styles.price}>
                     <p className={`${styles.moneyIcon} text text_type_digits-default mb-1`}>
@@ -33,7 +67,7 @@ function IngredientItem({ item }) {
             </div>
 
             {isModalOpen && (
-                <Modal title="Детали ингредиента" isOpen={isModalOpen} onClose={closeModal}>
+                <Modal title="Детали ингредиента" isOpen={isModalOpen} onClose={handleCloseModal}>
                     <IngredientDetails item={item} />
                 </Modal>
             )}
