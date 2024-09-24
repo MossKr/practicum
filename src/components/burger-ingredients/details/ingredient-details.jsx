@@ -1,14 +1,14 @@
-import React from "react";
-import { IngredientType } from '../../../utils/types';
+import React, { useMemo } from "react";
+import { IngredientType } from "../../../utils/types";
 import styles from "./details.module.css";
 
 const IngredientDetails = React.memo(function IngredientDetails({ item }) {
-    const details = [
-        { label: "Калории, ккал", value: item.calories },
-        { label: "Белки, г", value: item.proteins },
-        { label: "Жиры, г", value: item.fat },
-        { label: "Углеводы, г", value: item.carbohydrates },
-    ];
+    const details = useMemo(() => [
+        { label: "Калории,ккал", value: item.calories },
+        { label: "Белки,г", value: item.proteins },
+        { label: "Жиры,г", value: item.fat },
+        { label: "Углеводы,г", value: item.carbohydrates },
+    ], [item]);
 
     return (
         <div className={styles.modalBody}>
