@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import styles from "./styles.module.css";
 import { login, clearError, clearIntendedPath, setNotification, selectNotification } from '../services/auth/authSlice';
+import { useFormAndValidation } from '../hooks/useFormAndValidation';
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { values, handleChange, errors, isValid, resetForm, validateAll } = useFormAndValidation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,14 +31,15 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(clearError());
-    if (!email || !password) {
-      dispatch(setNotification('Пожалуйста, заполните все поля'));
+    validateAll();
+    if (!isValid) {
+      dispatch(setNotification('Пожалуйста, заполните все поля корректно'));
       return;
     }
     try {
-      await dispatch(login({ email, password })).unwrap();
+      await dispatch(login({ email: values.email, password: values.password })).unwrap();
       dispatch(setNotification('Вход выполнен успешно'));
+      resetForm();
     } catch (error) {
       dispatch(setNotification('Ошибка при входе. Проверьте введенные данные'));
     }
@@ -47,32 +48,36 @@ function Login() {
   return (
     <div className={styles.loginForm}>
       <h2 className="text text_type_main-medium mb-6">Вход</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <Input
           type='email'
           placeholder='E-mail'
-          onChange={e => setEmail(e.target.value)}
-          value={email}
+          onChange={handleChange}
+          value={values.email || ''}
           name='email'
-          error={false}
-          errorText='Ошибка'
+          error={!!errors.email}
+          errorText={errors.email}
           size='default'
           extraClass="mb-6"
           autoComplete="email"
+          required
         />
         <PasswordInput
-          onChange={e => setPassword(e.target.value)}
-          value={password}
+          onChange={handleChange}
+          value={values.password || ''}
           name='password'
+          error={!!errors.password}
+          errorText={errors.password}
           extraClass="mb-6"
           autoComplete="current-password"
+          required
         />
         <Button
           type="primary"
           size="medium"
           htmlType="submit"
           extraClass="mb-20"
-          disabled={isLoading}
+          disabled={isLoading || !isValid}
         >
           {isLoading ? 'Вход...' : 'Войти'}
         </Button>

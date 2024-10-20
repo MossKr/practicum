@@ -5,7 +5,7 @@ import BurgerIngredients from "../components/burger-ingredients/burger-ingredien
 import BurgerConstructor from "../components/burger-constructor/burger-constructor";
 
 function Home() {
-    const { ingredients, isLoading, error } = useSelector(state => state.ingredients);
+    const { isLoading, error } = useSelector(state => state.ingredients);
 
     if (isLoading) {
         return <div className={styles.loading}>Загрузка ингредиентов...</div>;
@@ -14,12 +14,11 @@ function Home() {
     if (error) {
         return <div className={styles.error}>Ошибка: {error}</div>;
     }
-
     return (
         <main className={styles.main}>
             <section className={styles.container}>
                 <div className={`${styles.block} ${styles.firstBlock}`}>
-                    <BurgerIngredients ingredients={ingredients}/>
+                    <BurgerIngredients />
                 </div>
                 <div className={`${styles.block} ${styles.secondBlock}`}>
                     <BurgerConstructor />

@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, Link, useLocation } from "react-router-dom";
 import styles from "./app-header.module.css";
 import { Logo, BurgerIcon, ListIcon, ProfileIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import MenuButton from "../common/menu-button/menu-button";
@@ -35,7 +35,7 @@ const AppHeader = memo(function AppHeader() {
                     </NavLink>
                 </div>
                 <div className={styles.logo}>
-                    <Logo />
+                  <Link to="/"><Logo /> </Link>
                 </div>
                 <div className={styles.rightBtn}>
                     <NavLink to="/profile" className={getLinkClass}>

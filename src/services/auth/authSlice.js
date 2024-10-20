@@ -16,18 +16,14 @@ const clearTokens = () => {
 
 const createAsyncThunkWithTokens = (type, apiCall, options = {}) => {
   return createAsyncThunk(type, async (arg, { rejectWithValue }) => {
-    try {
-      const response = await apiCall(arg);
-      if (options.setTokens && response.accessToken && response.refreshToken) {
-        setTokens(response.accessToken, response.refreshToken);
-      }
-      if (options.clearTokens) {
-        clearTokens();
-      }
-      return options.returnUser && response.user ? response.user : response;
-    } catch (error) {
-      return rejectWithValue(error.message);
+    const response = await apiCall(arg);
+    if (options.setTokens && response.accessToken && response.refreshToken) {
+      setTokens(response.accessToken, response.refreshToken);
     }
+    if (options.clearTokens) {
+      clearTokens();
+    }
+    return options.returnUser && response.user ? response.user : response;
   });
 };
 
@@ -43,86 +39,61 @@ export const login = createAsyncThunkWithTokens(
   { setTokens: true, returnUser: true }
 );
 
-export const logout = createAsyncThunk('auth/logout', async (_, { dispatch, rejectWithValue }) => {
-  try {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) throw new Error('Refresh token not found');
-    const response = await api.logout(refreshToken);
-    if (response.success) {
-      clearTokens();
-      dispatch(setIntendedPath('/profile'));
+export const logout = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) throw new Error('Refresh token not found');
+  const response = await api.logout(refreshToken);
+  if (response.success) {
+    clearTokens();
+    dispatch(setIntendedPath('/profile'));
+  }
+  return response;
+});
+
+export const refreshToken = createAsyncThunk('auth/refreshToken', async () => {
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) throw new Error('Refresh token not found');
+  const response = await api.refreshToken(refreshToken);
+  if (response.success && response.accessToken && response.refreshToken) {
+    setTokens(response.accessToken, response.refreshToken);
+  }
+  return response;
+});
+
+export const getUser = createAsyncThunk('auth/getUser', async (_, { dispatch }) => {
+  let token = Cookies.get('accessToken');
+  if (!token) {
+    const result = await dispatch(refreshToken());
+    if (refreshToken.fulfilled.match(result)) {
+      token = Cookies.get('accessToken');
+    } else {
+      throw new Error('Unable to refresh token');
     }
-    return response;
-  } catch (error) {
-    return rejectWithValue(error.message);
   }
+  const response = await api.getUser(token);
+  return response.user;
 });
 
-
-export const refreshToken = createAsyncThunk('auth/refreshToken', async (_, { rejectWithValue }) => {
-  try {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) throw new Error('Refresh token not found');
-    const response = await api.refreshToken(refreshToken);
-    if (response.success && response.accessToken && response.refreshToken) {
-      setTokens(response.accessToken, response.refreshToken);
+export const updateUser = createAsyncThunk('auth/updateUser', async (userData, { dispatch }) => {
+  let token = Cookies.get('accessToken');
+  if (!token) {
+    const result = await dispatch(refreshToken());
+    if (refreshToken.fulfilled.match(result)) {
+      token = Cookies.get('accessToken');
+    } else {
+      throw new Error('Unable to refresh token');
     }
-    return response;
-  } catch (error) {
-    return rejectWithValue(error.message);
   }
+  const response = await api.updateUser(token, userData);
+  return response.user;
 });
 
-export const getUser = createAsyncThunk('auth/getUser', async (_, { rejectWithValue, dispatch }) => {
-  try {
-    let token = Cookies.get('accessToken');
-    if (!token) {
-      const result = await dispatch(refreshToken());
-      if (refreshToken.fulfilled.match(result)) {
-        token = Cookies.get('accessToken');
-      } else {
-        throw new Error('Unable to refresh token');
-      }
-    }
-    const response = await api.getUser(token);
-    return response.user;
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
+export const resetPassword = createAsyncThunk('auth/resetPassword', async (email) => {
+  return await api.resetPassword(email);
 });
 
-export const updateUser = createAsyncThunk('auth/updateUser', async (userData, { rejectWithValue, dispatch }) => {
-  try {
-    let token = Cookies.get('accessToken');
-    if (!token) {
-      const result = await dispatch(refreshToken());
-      if (refreshToken.fulfilled.match(result)) {
-        token = Cookies.get('accessToken');
-      } else {
-        throw new Error('Unable to refresh token');
-      }
-    }
-    const response = await api.updateUser(token, userData);
-    return response.user;
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
-});
-
-export const resetPassword = createAsyncThunk('auth/resetPassword', async (email, { rejectWithValue }) => {
-  try {
-    return await api.resetPassword(email);
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
-});
-
-export const resetPasswordConfirm = createAsyncThunk('auth/resetPasswordConfirm', async ({ password, token }, { rejectWithValue }) => {
-  try {
-    return await api.resetPasswordConfirm(password, token);
-  } catch (error) {
-    return rejectWithValue(error.message);
-  }
+export const resetPasswordConfirm = createAsyncThunk('auth/resetPasswordConfirm', async ({ password, token }) => {
+  return await api.resetPasswordConfirm(password, token);
 });
 
 export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { dispatch }) => {
@@ -133,13 +104,8 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { dispatch
     try {
       return await dispatch(getUser()).unwrap();
     } catch (error) {
-      try {
-        await dispatch(refreshToken()).unwrap();
-        return await dispatch(getUser()).unwrap();
-      } catch (refreshError) {
-        clearTokens();
-        throw refreshError;
-      }
+      await dispatch(refreshToken()).unwrap();
+      return await dispatch(getUser()).unwrap();
     }
   } else {
     throw new Error('No tokens found');
