@@ -1,9 +1,0 @@
-.modalBody {
-    display: flex;
-    text-align: center;
-    align-items: center;
-    flex-direction: column;
-}
-.numberOrder {
-    text-shadow: 0 0 30px #3333ff; /*figma CHECKED*/
-}
