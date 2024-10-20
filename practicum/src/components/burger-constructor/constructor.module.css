@@ -1,0 +1,72 @@
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px; /*по сиходникам figma (16px от bun верх CHEKED */
+  width: 100%;
+  height: 759px;
+}
+.fillContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /*figma (4x4px) CHECKED*/
+  width: 100%;
+}
+.bunsAlign {
+  width: calc(100% - 32px); /*figma (4x8px) CHECKED*/
+}
+.ingredient {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.ingredient > *:first-child {
+  margin-right: 8px; /*figma 24px icon + 8 margin = 32px (x8px) CHECKED*/
+}
+/*colors common.css @ya.practicum */
+.customScroll {
+  scrollbar-width: thin;
+  overflow-y: auto;
+  scrollbar-color: #8585ad #2f2f37;
+}
+.orderElements {
+  display: flex;
+}
+.orderButton {
+  display: flex;
+  position: static;
+  justify-content: end;
+  padding: 15px 32px 10px 0;
+}
+.orderTotal {
+  padding-right: 0px;
+  align-content: center;
+}
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #4a4ae8;
+  border-radius: 15px;
+  padding: 30px;
+  transition: all 0.5s ease;
+}
+
+.dropZone:hover {
+  background-color: rgba(76, 76, 255, 0.1);
+}
+.dropIcon {
+  font-size: 32px;
+  color: #4C4CFF;
+  margin-bottom: 8px;
+}
+.draggableItem {
+  display: flex;
+  align-items: center;
+  cursor: move;
+}
+
+.draggableItem > *:first-child {
+  margin-right: 8px; /*figma 24px icon + 8 margin = 32px (x8px) CHECKED*/
+}
