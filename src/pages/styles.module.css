@@ -1,0 +1,141 @@
+.container {
+  display: flex;
+  justify-content: center;
+  padding-top: 0px;
+  margin: 0;
+}
+
+.block {
+  width: 600px;
+}
+
+.firstBlock {
+  margin-right: 20px;
+}
+
+.secondBlock {
+  margin-left: 20px;
+}
+
+.resetPasswordForm,
+.forgotPasswordForm,
+.registerForm,
+.loginForm {
+  display: flex;
+  text-align: center;
+  align-items: center;
+  margin-top: 200px;
+  flex-direction: column;
+}
+
+.link {
+  color: #4C4CFF;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.profileContainer {
+  display: flex;
+  justify-content: flex-start;
+  padding: 120px 0;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.nav {
+  width: 320px;
+  margin-right: 60px;
+}
+
+.navList {
+  list-style-type: none;
+  padding: 0;
+  margin-left: 22px;
+}
+
+.navList li {
+  font-size: 24px;
+  line-height: 30px;
+  margin-bottom: 36px;
+}
+
+.navList a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.navList a:hover {
+  color: #F2F2F3;
+}
+
+.active {
+  color: #F2F2F3;
+}
+
+.inactive {
+  color: #8585AD;
+}
+
+.logout {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #8585AD;
+  font-size: 24px;
+  line-height: 30px;
+}
+
+.logout:hover {
+  color: #F2F2F3;
+}
+
+.navDescription {
+  font-size: 14px;
+  line-height: 22px;
+  color: #8585AD;
+  opacity: 0.4;
+  margin-top: 80px;
+  margin-left: 22px;
+}
+
+.contentContainer {
+  width: 480px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.input {
+  margin-bottom: 24px;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.buttonContainer button {
+  margin-left: 20px;
+}
+
+.loading, .error {
+  text-align: center;
+  font-size: 24px;
+  color: #F2F2F3;
+  margin-top: 100px;
+}
+
+.description {
+  font-size: 16px;
+  line-height: 24px;
+  color: #8585AD;
+  opacity: 0.4;
+  margin-top: 80px;
+}
