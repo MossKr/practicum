@@ -1,39 +1,53 @@
 .header {
-    display: flex;
-    width: 100%;
-    height: 88px;
-    padding: 16px 5%;
-    gap: 8px;
-    box-sizing: border-box;
-    align-items: center;
-    justify-content: center;
-    background-color: #1C1C21;
-  }
+  display: flex;
+  width: 100%;
+  height: 88px;
+  padding: 16px 5%;
+  gap: 8px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  background-color: #1C1C21;
+}
 
-  .nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 1280px;
-  }
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1280px;
+}
 
-  .leftGroup,
-  .rightBtn {
-    display: flex;
-    align-items: center;
-  }
+.leftGroup,
+.rightBtn {
+  display: flex;
+  align-items: center;
+}
 
-  .leftGroup {
-    gap: 8px;
-  }
+.leftGroup {
+  gap: 8px;
+}
 
-  .logo {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
+.logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
-  .rightBtn {
-    justify-content: flex-end;
-  }
+.rightBtn {
+  justify-content: flex-end;
+}
+
+.link {
+  text-decoration: none;
+  color: #8585AD;
+}
+
+.activeLink {
+  color: #F2F2F3;
+}
+
+.activeLink span {
+  color: #F2F2F3;
+}
+

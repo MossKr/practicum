@@ -1,5 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchIngredients, selectIngredients, selectIngredientsStatus, selectIngredientsError } from "../../services/ingredients/ingredientsSlice";
 import { setCurrentIngredient } from "../../services/currentIngredient/currentIngredientSlice";
 import { selectConstructorItems } from "../../services/constructor/constructorSlice";
@@ -9,6 +10,8 @@ import styles from "./ingredients.module.css";
 
 function BurgerIngredients() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
     const ingredients = useSelector(selectIngredients);
     const status = useSelector(selectIngredientsStatus);
     const error = useSelector(selectIngredientsError);
@@ -57,6 +60,7 @@ function BurgerIngredients() {
 
     const handleIngredientClick = (ingredient) => {
         dispatch(setCurrentIngredient(ingredient));
+        navigate(`/ingredients/${ingredient._id}`, { state: { background: location } });
     };
 
     if (status === "loading") {

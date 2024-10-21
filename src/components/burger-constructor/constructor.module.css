@@ -70,3 +70,26 @@
 .draggableItem > *:first-child {
   margin-right: 8px; /*figma 24px icon + 8 margin = 32px (x8px) CHECKED*/
 }
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.progressBar {
+  width: 200px;
+  height: 20px;
+  background-color: #f3f3f3;
+  border-radius: 10px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #4C4CFF;
+  transition: width 0.2s ease-out;
+}
+

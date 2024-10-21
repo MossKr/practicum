@@ -1,14 +1,42 @@
 import React, { useMemo } from "react";
+import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectIngredients, selectIngredientsStatus } from "../../../services/ingredients/ingredientsSlice";
 import { IngredientType } from "../../../utils/types";
 import styles from "./details.module.css";
 
-const IngredientDetails = React.memo(function IngredientDetails({ item }) {
-    const details = useMemo(() => [
-        { label: "Калории,ккал", value: item.calories },
-        { label: "Белки,г", value: item.proteins },
-        { label: "Жиры,г", value: item.fat },
-        { label: "Углеводы,г", value: item.carbohydrates },
-    ], [item]);
+const IngredientDetails = React.memo(function IngredientDetails({ item: propItem }) {
+    const { id } = useParams();
+    const ingredients = useSelector(selectIngredients);
+    const status = useSelector(selectIngredientsStatus);
+
+    const item = useMemo(() => {
+        if (propItem) return propItem;
+        if (id) return ingredients.find(ingredient => ingredient._id === id);
+        return null;
+    }, [propItem, id, ingredients]);
+
+    const details = useMemo(() => {
+        if (!item) return [];
+        return [
+            { label: "Калории,ккал", value: item.calories },
+            { label: "Белки,г", value: item.proteins },
+            { label: "Жиры,г", value: item.fat },
+            { label: "Углеводы,г", value: item.carbohydrates },
+        ];
+    }, [item]);
+
+    if (!propItem && status === "loading") {
+        return <div>Загрузка...</div>;
+    }
+
+    if (!propItem && status === "failed") {
+        return <div>Произошла ошибка при загрузке данных</div>;
+    }
+
+    if (!item) {
+        return <div>Ингредиент не найден</div>;
+    }
 
     return (
         <div className={styles.modalBody}>
@@ -27,7 +55,7 @@ const IngredientDetails = React.memo(function IngredientDetails({ item }) {
 });
 
 IngredientDetails.propTypes = {
-    item: IngredientType.isRequired,
+    item: IngredientType,
 };
 
 export default IngredientDetails;
