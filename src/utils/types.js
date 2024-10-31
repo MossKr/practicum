@@ -1,27 +1,22 @@
 import PropTypes from 'prop-types';
 
 export const IngredientType = PropTypes.shape({
-
-    _id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    type: PropTypes.oneOf(["bun", "sauce", "main"]).isRequired,
-    proteins: PropTypes.number.isRequired,
-    fat: PropTypes.number.isRequired,
-    carbohydrates: PropTypes.number.isRequired,
-    calories: PropTypes.number.isRequired,
-    price: PropTypes.number.isRequired,
-    image: PropTypes.string.isRequired,
-
-
+_id: PropTypes.string.isRequired,
+name: PropTypes.string.isRequired,
+type: PropTypes.oneOf(["bun", "sauce", "main"]).isRequired,
+proteins: PropTypes.number.isRequired,
+fat: PropTypes.number.isRequired,
+carbohydrates: PropTypes.number.isRequired,
+calories: PropTypes.number.isRequired,
+price: PropTypes.number.isRequired,
+image: PropTypes.string.isRequired,
+image_large: PropTypes.string.isRequired,
 });
 
 export const LoadingPropType = PropTypes.bool;
 export const ErrorPropType = PropTypes.string;
 
 export const LoadErrorPropTypes = {
-
-    isLoading: LoadingPropType,
-    error: ErrorPropType,
-
-
+isLoading: LoadingPropType,
+error: ErrorPropType,
 };

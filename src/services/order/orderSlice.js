@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
 
-
 export const createOrder = createAsyncThunk(
     "order/createOrder",
     async (ingredients, { rejectWithValue }) => {
@@ -35,6 +34,8 @@ export const createOrder = createAsyncThunk(
         }
     }
 );
+
+
 
 const orderSlice = createSlice({
     name: "order",
