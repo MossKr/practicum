@@ -47,31 +47,27 @@ class Api {
     });
   }
 
-  async login(email: string, password: string): Promise<AuthResponse> {
-    console.log('Attempting login with:', { email, password: '****' });
-    try {
-      const data = await this._request("/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-  
-      console.log('Login response:', data);
-      if (data.success && data.accessToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
-        console.log('Tokens saved to localStorage');
-      } else {
-        console.error('Login successful but no tokens received');
-      }
-      return data;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
+ async login(email: string, password: string): Promise<AuthResponse> {
+  console.log('Attempting login with:', { email, password: '****' });
+  const data = await this._request("/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  console.log('Login response:', data);
+  if (data.success && data.accessToken) {
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    console.log('Tokens saved to localStorage');
+  } else {
+    console.error('Login successful but no tokens received');
   }
+  return data;
+}
+
   
   logout(token: string): Promise<{ success: boolean }> {
     return this._request("/auth/logout", {
