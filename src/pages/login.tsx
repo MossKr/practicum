@@ -6,17 +6,21 @@ import styles from "./styles.module.css";
 import { login, clearError, clearIntendedPath, setNotification, selectNotification } from '../services/auth/authSlice';
 import { useFormAndValidation } from '../hooks/useFormAndValidation';
 
-function Login() {
+interface LocationState {
+  from?: string;
+}
+
+function Login(): JSX.Element {
   const { values, handleChange, errors, isValid, resetForm, validateAll } = useFormAndValidation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoading, error, isAuthenticated, intendedPath } = useSelector(state => state.auth);
+  const { isLoading, error, isAuthenticated, intendedPath } = useSelector((state: any) => state.auth);
   const notification = useSelector(selectNotification);
 
   useEffect(() => {
     if (isAuthenticated) {
-      const from = location.state?.from || intendedPath || '/';
+      const from = (location.state as LocationState)?.from || intendedPath || '/';
       navigate(from, { replace: true });
       dispatch(clearIntendedPath());
     }
@@ -29,7 +33,7 @@ function Login() {
     };
   }, [dispatch]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     validateAll();
     if (!isValid) {
@@ -37,7 +41,8 @@ function Login() {
       return;
     }
     try {
-      await dispatch(login({ email: values.email, password: values.password })).unwrap();
+      //@ts-ignore
+      await dispatch(login({ email: values.email, password: values.password }) as any).unwrap();
       dispatch(setNotification('Вход выполнен успешно'));
       resetForm();
     } catch (error) {
@@ -66,12 +71,11 @@ function Login() {
           onChange={handleChange}
           value={values.password || ''}
           name='password'
-          error={!!errors.password}
-          errorText={errors.password}
           extraClass="mb-6"
           autoComplete="current-password"
           required
         />
+        {errors.password && <p className="text text_type_main-default text_color_error mb-4">{errors.password}</p>}
         <Button
           type="primary"
           size="medium"

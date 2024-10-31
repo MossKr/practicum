@@ -1,26 +1,31 @@
 import { BASE_URL } from "../utils/utilApi";
+import { Ingredient, Order, AuthResponse, UserData } from "../utils/typesTs";
 
 class Api {
-  constructor(baseUrl) {
+  private baseUrl: string;
+
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
   }
 
-  _checkResponse(res) {
+  private async _checkResponse(res: Response): Promise<any> {
     if (res.ok) {
-      return res.json();
+      return await res.json();
     }
-    return Promise.reject(`Ошибка ${res.status}`);
+    const err = await res.json();
+    throw err;
   }
+  
 
-  _request(endpoint, options) {
+  private _request(endpoint: string, options?: RequestInit): Promise<any> {
     return fetch(`${this.baseUrl}${endpoint}`, options).then(this._checkResponse);
   }
 
-  getIngredients() {
+  getIngredients(): Promise<{ success: boolean; data: Ingredient[] }> {
     return this._request("/ingredients");
   }
 
-  createOrder({ ingredients, token }) {
+  createOrder({ ingredients, token }: { ingredients: string[], token: string }): Promise<Order> {
     const formattedToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     return this._request("/orders", {
       method: "POST",
@@ -32,7 +37,7 @@ class Api {
     });
   }
 
-  register(email, password, name) {
+  register(email: string, password: string, name: string): Promise<AuthResponse> {
     return this._request("/auth/register", {
       method: "POST",
       headers: {
@@ -42,17 +47,29 @@ class Api {
     });
   }
 
-  login(email, password) {
-    return this._request("/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-  }
+ async login(email: string, password: string): Promise<AuthResponse> {
+  console.log('Attempting login with:', { email, password: '****' });
+  const data = await this._request("/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
 
-  logout(token) {
+  console.log('Login response:', data);
+  if (data.success && data.accessToken) {
+    localStorage.setItem('accessToken', data.accessToken);
+    localStorage.setItem('refreshToken', data.refreshToken);
+    console.log('Tokens saved to localStorage');
+  } else {
+    console.error('Login successful but no tokens received');
+  }
+  return data;
+}
+
+  
+  logout(token: string): Promise<{ success: boolean }> {
     return this._request("/auth/logout", {
       method: "POST",
       headers: {
@@ -62,7 +79,7 @@ class Api {
     });
   }
 
-  resetPassword(email) {
+  resetPassword(email: string): Promise<{ success: boolean }> {
     return this._request("/password-reset", {
       method: "POST",
       headers: {
@@ -72,7 +89,7 @@ class Api {
     });
   }
 
-  resetPasswordConfirm(password, token) {
+  resetPasswordConfirm(password: string, token: string): Promise<{ success: boolean }> {
     return this._request("/password-reset/reset", {
       method: "POST",
       headers: {
@@ -82,7 +99,7 @@ class Api {
     });
   }
 
-  refreshToken(token) {
+  refreshToken(token: string): Promise<AuthResponse> {
     return this._request("/auth/token", {
       method: "POST",
       headers: {
@@ -92,7 +109,7 @@ class Api {
     });
   }
 
-  getUser(token) {
+  getUser(token: string): Promise<{ success: boolean; user: UserData }> {
     return this._request("/auth/user", {
       method: "GET",
       headers: {
@@ -102,7 +119,7 @@ class Api {
     });
   }
 
-  updateUser(token, userData) {
+  updateUser(token: string, userData: UserData): Promise<{ success: boolean; user: UserData }> {
     return this._request("/auth/user", {
       method: "PATCH",
       headers: {

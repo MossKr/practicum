@@ -2,47 +2,63 @@ import React, { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { DragIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import styles from "./constructor.module.css";
-import PropTypes from 'prop-types';
-import { IngredientType } from '../../utils/types';
+import { Ingredient, DragItem } from '../../utils/typesTs';
 
-const Draggable = ({ ingredient, index, moveIngredient, children }) => {
-    const ref = useRef(null);
+interface DraggableProps {
+    ingredient: Ingredient;
+    index: number;
+    moveIngredient: (dragIndex: number, hoverIndex: number) => void;
+    handleRemove: () => void;
+    children: React.ReactNode;
+}
+const Draggable: React.FC<DraggableProps> = ({ ingredient, index, moveIngredient, handleRemove, children }) => {
+    const ref = useRef<HTMLDivElement>(null);
 
-    const [{ handlerId }, drop] = useDrop({
+    const [{ handlerId }, drop] = useDrop<DragItem, void, { handlerId: string | symbol | null }>({
         accept: "constructorElement",
         collect(monitor) {
             return {
                 handlerId: monitor.getHandlerId(),
             };
         },
-        hover(item, monitor) {
+        hover(item: DragItem, monitor) {
             if (!ref.current) {
                 return;
             }
             const dragIndex = item.index;
             const hoverIndex = index;
+
             if (dragIndex === hoverIndex) {
                 return;
             }
-            const hoverBoundingRect = ref.current?.getBoundingClientRect();
+
+            const hoverBoundingRect = ref.current.getBoundingClientRect();
             const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
             const clientOffset = monitor.getClientOffset();
+
+            if (!clientOffset) {
+                return;
+            }
+
             const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
             if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
                 return;
             }
+
             if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
                 return;
             }
+
             moveIngredient(dragIndex, hoverIndex);
             item.index = hoverIndex;
         },
     });
 
-    const [{ isDragging }, drag] = useDrag({
+    const [{ isDragging }, drag] = useDrag<DragItem, void, { isDragging: boolean }>({
         type: "constructorElement",
         item: () => {
-            return { id: ingredient.id, index };
+            return { id: ingredient._id, index };
         },
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),
@@ -53,18 +69,16 @@ const Draggable = ({ ingredient, index, moveIngredient, children }) => {
     drag(drop(ref));
 
     return (
-        <div ref={ref} style={{ opacity }} className={styles.draggableItem} data-handler-id={handlerId}>
+        <div
+            ref={ref}
+            style={{ opacity }}
+            className={styles.draggableItem}
+            data-handler-id={handlerId}
+        >
             <DragIcon type="primary" />
             {children}
         </div>
     );
-};
-
-Draggable.propTypes = {
-    ingredient: IngredientType.isRequired,
-    index: PropTypes.number.isRequired,
-    moveIngredient: PropTypes.func.isRequired,
-    children: PropTypes.node.isRequired,
 };
 
 export default Draggable;

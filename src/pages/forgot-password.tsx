@@ -5,11 +5,11 @@ import { Input, Button } from '@ya.praktikum/react-developer-burger-ui-component
 import { resetPassword, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from "./styles.module.css";
 
-function ForgotPassword() {
-  const [email, setEmail] = useState('');
+function ForgotPassword(): JSX.Element {
+  const [email, setEmail] = useState<string>('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading, error, resetPasswordRequestSuccess } = useSelector(state => state.auth);
+  const { isLoading, error, resetPasswordRequestSuccess } = useSelector((state: any) => state.auth);
   const notification = useSelector(selectNotification);
 
   const handleResetPasswordSuccess = useCallback(() => {
@@ -28,10 +28,11 @@ function ForgotPassword() {
     };
   }, [dispatch, handleResetPasswordSuccess]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await dispatch(resetPassword(email)).unwrap();
+      //@ts-ignore
+      await dispatch(resetPassword(email) as any);
     } catch (error) {
       console.error('Password reset request failed:', error);
       dispatch(setNotification('Не удалось отправить запрос на сброс пароля. Пожалуйста, попробуйте еще раз.'));
@@ -45,7 +46,7 @@ function ForgotPassword() {
         <Input
           type='email'
           placeholder='Укажите e-mail'
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
           value={email}
           name='email'
           error={false}

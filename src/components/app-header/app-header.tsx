@@ -4,13 +4,17 @@ import styles from "./app-header.module.css";
 import { Logo, BurgerIcon, ListIcon, ProfileIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import MenuButton from "../common/menu-button/menu-button";
 
-const AppHeader = memo(function AppHeader() {
+interface GetLinkClassProps {
+  isActive: boolean;
+}
+
+const AppHeader = memo(function AppHeader(): JSX.Element {
     const location = useLocation();
 
-    const getLinkClass = ({ isActive }) =>
+    const getLinkClass = ({ isActive }: GetLinkClassProps): string =>
         `${styles.link} ${isActive ? styles.activeLink : ''}`;
 
-    const getIconType = (path) => {
+    const getIconType = (path: string): "primary" | "secondary" => {
         if (path === '/') {
             return location.pathname === path ? "primary" : "secondary";
         }
@@ -35,11 +39,11 @@ const AppHeader = memo(function AppHeader() {
                     </NavLink>
                 </div>
                 <div className={styles.logo}>
-                  <Link to="/"><Logo /> </Link>
+                    <Link to="/"><Logo /> </Link>
                 </div>
                 <div className={styles.rightBtn}>
                     <NavLink to="/profile" className={getLinkClass}>
-                        {({ isActive }) => (
+                        {({ isActive }: { isActive: boolean }) => (
                             <MenuButton>
                                 <ProfileIcon type={isActive ? "primary" : "secondary"} />
                                 <span>Личный кабинет</span>

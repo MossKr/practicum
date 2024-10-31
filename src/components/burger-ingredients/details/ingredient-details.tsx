@@ -2,21 +2,32 @@ import React, { useMemo } from "react";
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectIngredients, selectIngredientsStatus } from "../../../services/ingredients/ingredientsSlice";
-import { IngredientType } from "../../../utils/types";
+import { Ingredient } from "../../../utils/typesTs";
 import styles from "./details.module.css";
 
-const IngredientDetails = React.memo(function IngredientDetails({ item: propItem }) {
-    const { id } = useParams();
+interface IngredientDetailsProps {
+    item?: Ingredient;
+}
+
+interface DetailItem {
+    label: string;
+    value: number;
+}
+
+const IngredientDetails: React.FC<IngredientDetailsProps> = React.memo(({ item: propItem }) => {
+    const { id } = useParams<{ id: string }>();
+    // @ts-ignore
     const ingredients = useSelector(selectIngredients);
+    // @ts-ignore
     const status = useSelector(selectIngredientsStatus);
 
     const item = useMemo(() => {
         if (propItem) return propItem;
-        if (id) return ingredients.find(ingredient => ingredient._id === id);
+        if (id) return ingredients.find((ingredient: Ingredient) => ingredient._id === id);
         return null;
     }, [propItem, id, ingredients]);
 
-    const details = useMemo(() => {
+    const details = useMemo((): DetailItem[] => {
         if (!item) return [];
         return [
             { label: "Калории,ккал", value: item.calories },
@@ -54,8 +65,7 @@ const IngredientDetails = React.memo(function IngredientDetails({ item: propItem
     );
 });
 
-IngredientDetails.propTypes = {
-    item: IngredientType,
-};
+
+IngredientDetails.displayName = 'IngredientDetails';
 
 export default IngredientDetails;

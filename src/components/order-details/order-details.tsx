@@ -4,8 +4,18 @@ import styles from "./order-details.module.css";
 import img from "../../assets/images/check.svg";
 import Preloader from "../common/preloader/preloader";
 
-function OrderDetails() {
-    const { orderNumber, status, error } = useSelector(state => state.order);
+interface OrderState {
+    orderNumber: number | null;
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+}
+
+interface RootState {
+    order: OrderState;
+}
+
+const OrderDetails: React.FC = () => {
+    const { orderNumber, status, error } = useSelector((state: RootState) => state.order);
 
     const content = useMemo(() => {
         switch (status) {
@@ -45,6 +55,6 @@ function OrderDetails() {
     }, [status, orderNumber, error]);
 
     return content;
-}
+};
 
 export default React.memo(OrderDetails);

@@ -3,10 +3,16 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setIntendedPath } from '../services/auth/authSlice';
 
-function ProtectedRouteElement({ element, allowAuthorized = true, redirectPath }) {
+interface ProtectedRouteElementProps {
+  element: React.ReactElement;
+  allowAuthorized?: boolean;
+  redirectPath: string;
+}
+
+function ProtectedRouteElement({ element, allowAuthorized = true, redirectPath }: ProtectedRouteElementProps) {
   const location = useLocation();
   const dispatch = useDispatch();
-  const { isAuthenticated, authChecked, intendedPath } = useSelector(state => state.auth);
+  const { isAuthenticated, authChecked, intendedPath } = useSelector((state: any) => state.auth);
 
   useEffect(() => {
     if (allowAuthorized && !isAuthenticated && location.pathname !== '/login') {

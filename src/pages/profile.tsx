@@ -1,21 +1,46 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, Routes, Route, useNavigate } from 'react-router-dom';
 import { Input, Button } from '@ya.praktikum/react-developer-burger-ui-components';
 import { getUser, updateUser, logout, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from './styles.module.css';
 
-function ProfileForm() {
+interface FormState {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface CustomInputProps {
+  type: 'text' | 'email' | 'password';
+  placeholder: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  value: string;
+  name: string;
+  error: boolean;
+  errorText: string;
+  size: 'default' | 'small';
+  icon: "EditIcon";
+  extraClass: string;
+  disabled: boolean;
+  onIconClick: () => void;
+}
+
+const CustomInput: React.FC<CustomInputProps> = (props) => (
+  <Input {...props} />
+);
+
+function ProfileForm(): JSX.Element {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user, isLoading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isLoading, error, isAuthenticated } = useSelector((state: any) => state.auth);
   const notification = useSelector(selectNotification);
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState<FormState>({ name: '', email: '', password: '' });
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(getUser());
+      dispatch(getUser() as any);
     } else {
       navigate('/login');
     }
@@ -29,25 +54,28 @@ function ProfileForm() {
 
   useEffect(() => {
     return () => {
-      dispatch(setNotification(null));
+      dispatch(setNotification(null) as any);
     };
   }, [dispatch]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (!isEditing) setIsEditing(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const updatedData = { ...form };
-    if (!form.password) delete updatedData.password;
+    const updatedData: Partial<FormState> = { name: form.name, email: form.email };
+    if (form.password) {
+      updatedData.password = form.password;
+    }
     try {
-      await dispatch(updateUser(updatedData)).unwrap();
-      dispatch(setNotification('Профиль успешно обновлен'));
+       // @ts-ignore
+      await dispatch(updateUser(updatedData) as any);
+      dispatch(setNotification('Профиль успешно обновлен') as any);
       setIsEditing(false);
     } catch (error) {
-      dispatch(setNotification('Ошибка при обновлении профиля'));
+      dispatch(setNotification('Ошибка при обновлении профиля') as any);
     }
   };
 
@@ -61,7 +89,7 @@ function ProfileForm() {
 
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      <Input
+      <CustomInput
         type="text"
         placeholder="Имя"
         onChange={handleChange}
@@ -72,8 +100,10 @@ function ProfileForm() {
         size="default"
         icon="EditIcon"
         extraClass={styles.input}
+        disabled={!isEditing}
+        onIconClick={() => setIsEditing(true)}
       />
-      <Input
+      <CustomInput
         type="email"
         placeholder="E-mail"
         onChange={handleChange}
@@ -84,8 +114,10 @@ function ProfileForm() {
         size="default"
         icon="EditIcon"
         extraClass={styles.input}
+        disabled={!isEditing}
+        onIconClick={() => setIsEditing(true)}
       />
-      <Input
+      <CustomInput
         type="password"
         placeholder="Пароль"
         onChange={handleChange}
@@ -96,6 +128,8 @@ function ProfileForm() {
         size="default"
         icon="EditIcon"
         extraClass={styles.input}
+        disabled={!isEditing}
+        onIconClick={() => setIsEditing(true)}
       />
       {isEditing && (
         <div className={styles.buttonContainer}>
@@ -112,26 +146,25 @@ function ProfileForm() {
   );
 }
 
-function Profile() {
+function Profile(): JSX.Element {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state: any) => state.auth);
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(getUser());
+      dispatch(getUser() as any);
     }
   }, [dispatch, isAuthenticated]);
 
   const handleLogout = async () => {
     try {
-      await dispatch(logout()).unwrap();
-      dispatch(setNotification('Вы успешно вышли из системы'));
+      await dispatch(logout() as any);
+      dispatch(setNotification('Вы успешно вышли из системы') as any);
       navigate('/login');
       window.location.reload();
     } catch (error) {
-      dispatch(setNotification('Ошибка при выходе из системы'));
-
+      dispatch(setNotification('Ошибка при выходе из системы') as any);
     }
   };
 

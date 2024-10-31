@@ -1,7 +1,7 @@
 import React from 'react';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './components/app/app.jsx';
+import App from './components/app/app';
 import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';

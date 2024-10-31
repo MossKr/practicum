@@ -1,19 +1,25 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch} from "react-redux";
 import { useDrag } from "react-dnd";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { IngredientType } from "../../../utils/types";
+import { Ingredient } from "../../../utils/typesTs";
 import { Counter, CurrencyIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import styles from "../ingredients.module.css";
 import { setCurrentIngredient } from "../../../services/currentIngredient/currentIngredientSlice";
-import { selectBun, selectIngredients } from "../../../services/constructor/constructorSlice";
 
-function IngredientItem({ item }) {
+
+interface IngredientItemProps {
+    item: Ingredient;
+    count: number;
+    onIngredientClick: (item: Ingredient) => void;
+}
+
+function IngredientItem({ item, count, onIngredientClick }: IngredientItemProps): JSX.Element {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const bun = useSelector(selectBun);
-    const ingredients = useSelector(selectIngredients);
+
+
 
     const [{ isDragging }, dragRef] = useDrag({
         type: "ingredient",
@@ -23,16 +29,11 @@ function IngredientItem({ item }) {
         }),
     });
 
-    const count = React.useMemo(() => {
-        if (item.type === "bun") {
-            return bun && bun._id === item._id ? 2 : 0;
-        }
-        return ingredients.filter(ing => ing._id === item._id).length;
-    }, [item, bun, ingredients]);
-
-    function handleIngredientClick() {
+    function handleIngredientClick(): void {
+        // @ts-ignore
         dispatch(setCurrentIngredient(item));
         navigate(`/ingredients/${item._id}`, { state: { background: location } });
+        onIngredientClick(item);
     }
 
     return (
@@ -61,8 +62,5 @@ function IngredientItem({ item }) {
     );
 }
 
-IngredientItem.propTypes = {
-    item: IngredientType.isRequired,
-};
 
 export default IngredientItem;

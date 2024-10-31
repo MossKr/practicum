@@ -1,18 +1,41 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 
+
 export const createOrder = createAsyncThunk(
-    //CHECKED
     "order/createOrder",
     async (ingredients, { rejectWithValue }) => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            return rejectWithValue('Отсутствует токен авторизации');
+        }
+
         try {
-            const response = await api.createOrder(ingredients);
+            const response = await api.createOrder({ ingredients, token });
             return response;
-        } catch (error) {
-            return rejectWithValue(error.message);
+        } catch (apiError) {
+
+            if (apiError.message.includes('jwt')) {
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (refreshToken) {
+                    const refreshData = await api.refreshToken(refreshToken);
+                    if (refreshData.success) {
+                        localStorage.setItem('accessToken', refreshData.accessToken);
+
+                        const response = await api.createOrder({
+                            ingredients,
+                            token: refreshData.accessToken
+                        });
+                        return response;
+                    }
+                }
+            }
+            return rejectWithValue(apiError.message);
         }
     }
 );
+
+
 
 const orderSlice = createSlice({
     name: "order",

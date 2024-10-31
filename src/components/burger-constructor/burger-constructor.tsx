@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConstructorElement, Button, CurrencyIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import { useDrop } from "react-dnd";
+import { ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
 import styles from "./constructor.module.css";
 import Modal from "../common/modal/modal";
 import OrderDetails from "../order-details/order-details";
@@ -11,18 +13,28 @@ import { fetchIngredients, selectIngredientsStatus } from "../../services/ingred
 import { addIngredient, removeIngredient, moveIngredient, clearConstructor, selectBun, selectIngredients, selectTotalPrice } from "../../services/constructor/constructorSlice";
 import { createOrder, selectOrderNumber, selectOrderStatus, selectOrderError, clearOrder } from "../../services/order/orderSlice";
 import Draggable from "./draggable-constructor";
-import { selectIsAuthenticated, checkTokens } from "../../services/auth/authSlice";
+import { selectIsAuthenticated} from "../../services/auth/authSlice";
+import { Ingredient, ConstructorIngredient } from '../../utils/typesTs';
 
-function BurgerConstructor() {
-    const dispatch = useDispatch();
+
+interface ConstructorState {
+    bun: Ingredient | null;
+    ingredients: Ingredient[];
+}
+
+
+
+const BurgerConstructor = (): JSX.Element => {
+    const dispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
     const navigate = useNavigate();
     const location = useLocation();
-    const [isLoading, setIsLoading] = useState(false);
-    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [loadingProgress, setLoadingProgress] = useState<number>(0);
     const status = useSelector(selectIngredientsStatus);
     const bun = useSelector(selectBun);
     const constructorIngredients = useSelector(selectIngredients);
     const { isModalOpen, openModal, closeModal } = useModal();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const orderNumber = useSelector(selectOrderNumber);
     const orderStatus = useSelector(selectOrderStatus);
     const orderError = useSelector(selectOrderError);
@@ -37,15 +49,16 @@ function BurgerConstructor() {
 
     const [, dropTarget] = useDrop({
         accept: "ingredient",
-        drop(item) {
+        drop(item: Ingredient) {
             dispatch(addIngredient(item));
         },
     });
+
     useEffect(() => {
         if (isAuthenticated) {
             const savedState = localStorage.getItem('constructorState');
             if (savedState) {
-                const { bun, ingredients } = JSON.parse(savedState);
+                const { bun, ingredients } = JSON.parse(savedState) as ConstructorState;
                 if (bun) dispatch(addIngredient(bun));
                 ingredients.forEach(ingredient => dispatch(addIngredient(ingredient)));
                 localStorage.removeItem('constructorState');
@@ -69,32 +82,62 @@ function BurgerConstructor() {
 
     const handleOrderClick = useCallback(() => {
         if (!isAuthenticated) {
-
             const currentState = {
                 bun: bun,
                 ingredients: constructorIngredients
             };
             localStorage.setItem('constructorState', JSON.stringify(currentState));
-
             navigate('/login', { state: { from: location.pathname } });
             return;
         }
 
         if (bun && constructorIngredients.length > 0) {
-            const ingredientIds = [bun._id, ...constructorIngredients.map(item => item._id), bun._id];
+            const ingredientIds = [
+                bun._id,
+                ...constructorIngredients.map((item: ConstructorIngredient) => item._id),
+                bun._id
+            ];
+
             setIsLoading(true);
             openModal();
             const clearSimulation = simulateProgress();
-            dispatch(createOrder({ ingredients: ingredientIds, token: checkTokens().accessToken }))
+
+            // @ts-ignore
+            dispatch(createOrder(ingredientIds))
+                .unwrap()
+                .then(() => {
+                    setLoadingProgress(100);
+                })
+                .catch((err) => {
+                    // Проверяем, является ли err объектом и есть ли у него свойство message
+                    const errorMessage = err && typeof err === 'object' && 'message' in err
+                        ? err.message
+                        : 'Произошла неизвестная ошибка';
+
+                    if (typeof errorMessage === 'string' && errorMessage.toLowerCase().includes('токен')) {
+                        navigate('/login', { state: { from: location.pathname } });
+                    } else {
+                        alert(`Ошибка при оформлении заказа: ${errorMessage}`);
+                    }
+                    closeModal();
+                })
                 .finally(() => {
                     setIsLoading(false);
                     clearSimulation();
-                    setLoadingProgress(100);
                 });
         }
-    }, [dispatch, bun, constructorIngredients, isAuthenticated, navigate, location.pathname, openModal, simulateProgress]);
-
-
+    }, [
+        dispatch,
+        bun,
+        constructorIngredients,
+        isAuthenticated,
+        navigate,
+        location.pathname,
+        openModal,
+        closeModal,
+        simulateProgress,
+        setLoadingProgress
+    ]);
     useEffect(() => {
         if (orderStatus === 'failed') {
             closeModal();
@@ -110,14 +153,14 @@ function BurgerConstructor() {
     }, [closeModal, dispatch]);
 
     const handleRemove = useCallback(
-        (uniqueId) => {
+        (uniqueId: string) => {
             dispatch(removeIngredient(uniqueId));
         },
         [dispatch]
     );
 
     const moveIngredientHandler = useCallback(
-        (dragIndex, hoverIndex) => {
+        (dragIndex: number, hoverIndex: number) => {
             dispatch(moveIngredient({ dragIndex, hoverIndex }));
         },
         [dispatch]
@@ -130,7 +173,7 @@ function BurgerConstructor() {
     const isConstructorEmpty = useMemo(() => !bun && constructorIngredients.length === 0, [bun, constructorIngredients]);
 
     const renderBun = useCallback(
-        (type) => {
+        (type: "top" | "bottom") => {
             return bun ? (
                 <div className={styles.bunsAlign}>
                     <ConstructorElement
@@ -160,7 +203,7 @@ function BurgerConstructor() {
                 </div>
             );
         }
-        return constructorIngredients.map((item, index) => (
+        return constructorIngredients.map((item: ConstructorIngredient, index: number) => (
             <Draggable
                 key={item.uniqueId}
                 ingredient={item}
@@ -177,7 +220,6 @@ function BurgerConstructor() {
             </Draggable>
         ));
     }, [constructorIngredients, handleRemove, moveIngredientHandler, isConstructorEmpty]);
-
     return (
         <div className={`pt-25 ${styles.mainContainer}`} ref={dropTarget}>
             {renderBun("top")}
@@ -187,7 +229,7 @@ function BurgerConstructor() {
             <div className={styles.orderElements}>
                 <div className={`${styles.orderTotal} text text_type_digits-medium`}>
                     {totalPrice}
-                    <CurrencyIcon type="primary" className="pl-2" />
+                    <CurrencyIcon type="primary" />
                 </div>
 
                 <div className={styles.orderButton}>
@@ -213,25 +255,25 @@ function BurgerConstructor() {
             </div>
 
             {isModalOpen && (
-                <Modal title={" "} isOpen={isModalOpen} onClose={handleCloseModal}>
-                    {orderStatus === 'loading' || loadingProgress < 100 ? (
-                        <div className={styles.loadingContainer}>
-                            <p className="text text_type_main-medium">Оформляем заказ...</p>
-                            <div className={styles.progressBar}>
-                                <div
-                                    className={styles.progressFill}
-                                    style={{width: `${loadingProgress}%`}}
-                                ></div>
-                            </div>
-                            <p className="text text_type_main-small">{loadingProgress}%</p>
-                        </div>
-                    ) : (
-                        <OrderDetails orderNumber={orderNumber} />
-                    )}
-                </Modal>
+    <Modal title={" "} isOpen={isModalOpen} onClose={handleCloseModal}>
+        {orderStatus === 'loading' || loadingProgress < 100 ? (
+            <div className={styles.loadingContainer}>
+                <p className="text text_type_main-medium">Оформляем заказ...</p>
+                <div className={styles.progressBar}>
+                    <div
+                        className={styles.progressFill}
+                        style={{width: `${loadingProgress}%`}}
+                    ></div>
+                </div>
+                <p className="text text_type_main-small">{loadingProgress}%</p>
+            </div>
+        ) : (
+            <OrderDetails />
+        )}
+    </Modal>
             )}
         </div>
     );
-}
+};
 
 export default React.memo(BurgerConstructor);

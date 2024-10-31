@@ -1,16 +1,25 @@
 import React from "react";
-import { IngredientType } from "../../../utils/types";
-import PropTypes from "prop-types";
+import { Ingredient } from "../../../utils/typesTs";
 import IngredientItem from "../item/ingredient-item";
 import styles from "../ingredients.module.css";
 
-const IngredientCategory = React.memo(function IngredientCategory({
+interface IngredientCategoryProps {
+    title: string;
+    items: Ingredient[];
+    isVisible?: boolean;
+    onIngredientClick: (item: Ingredient) => void;
+    ingredientCounts: {
+        [key: string]: number;
+    };
+}
+
+const IngredientCategory: React.FC<IngredientCategoryProps> = React.memo(({
     title,
     items,
     isVisible = true,
     onIngredientClick,
     ingredientCounts
-}) {
+}) => {
     if (!isVisible) {
         return null;
     }
@@ -23,11 +32,12 @@ const IngredientCategory = React.memo(function IngredientCategory({
             <ul className={`${styles.ingredientsList} ${styles.noListMarker}`}>
                 {items.map((item) => (
                     <li key={item._id}>
-                        <IngredientItem
+                       <IngredientItem
                             item={item}
-                            onClick={() => onIngredientClick(item)}
+                            onIngredientClick={onIngredientClick}
                             count={ingredientCounts[item._id] || 0}
-                        />
+/>
+
                     </li>
                 ))}
             </ul>
@@ -35,12 +45,9 @@ const IngredientCategory = React.memo(function IngredientCategory({
     );
 });
 
-IngredientCategory.propTypes = {
-    title: PropTypes.string.isRequired,
-    items: PropTypes.arrayOf(IngredientType).isRequired,
-    isVisible: PropTypes.bool,
-    onIngredientClick: PropTypes.func.isRequired,
-    ingredientCounts: PropTypes.objectOf(PropTypes.number).isRequired,
-};
+
+
+
+IngredientCategory.displayName = 'IngredientCategory';
 
 export default IngredientCategory;

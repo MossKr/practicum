@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Location } from 'react-router-dom';
 import { useDispatch } from "react-redux";
+import type { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
 import AppHeader from "../app-header/app-header";
 import { fetchIngredients } from "../../services/ingredients/ingredientsSlice";
 import { checkAuth } from "../../services/auth/authSlice";
@@ -17,20 +19,22 @@ import NotFound from "../../pages/not-found";
 import IngredientDetails from "../burger-ingredients/details/ingredient-details";
 import IngredientPage from "../../pages/ingredient-page";
 
-function App() {
-  const dispatch = useDispatch();
+interface LocationState {
+  background?: Location;
+}
+
+function App(): JSX.Element {
+  const dispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
   const location = useLocation();
   const navigate = useNavigate();
-  const background = location.state && location.state.background;
+  const background = (location.state as LocationState)?.background;
 
   useEffect(() => {
     dispatch(fetchIngredients());
     dispatch(checkAuth());
   }, [dispatch]);
 
-
-
-  const closeModal = () => {
+  const closeModal = (): void => {
     navigate(-1);
   };
 
@@ -108,7 +112,7 @@ function App() {
   );
 }
 
-function AppWrapper() {
+function AppWrapper(): JSX.Element {
   return (
     <Router>
       <App />

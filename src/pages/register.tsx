@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import styles from "./styles.module.css";
 import { register, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
 
-function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+function Register(): JSX.Element {
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useSelector(state => state.auth);
+  const { isLoading, error, isAuthenticated } = useSelector((state: any) => state.auth);
   const notification = useSelector(selectNotification);
 
   useEffect(() => {
     return () => {
+      // @ts-ignore
       dispatch(clearError());
+      // @ts-ignore
       dispatch(setNotification(null));
     };
   }, [dispatch]);
@@ -27,17 +29,22 @@ function Register() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // @ts-ignore
     dispatch(clearError());
     if (!name || !email || !password) {
+      // @ts-ignore
       dispatch(setNotification('Пожалуйста, заполните все поля'));
       return;
     }
     try {
+      // @ts-ignore
       await dispatch(register({ email, password, name })).unwrap();
+      // @ts-ignore
       dispatch(setNotification('Регистрация прошла успешно'));
     } catch (error) {
+      // @ts-ignore
       dispatch(setNotification('Ошибка при регистрации. Пожалуйста, попробуйте еще раз'));
     }
   };
@@ -49,7 +56,7 @@ function Register() {
         <Input
           type='text'
           placeholder='Имя'
-          onChange={e => setName(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
           value={name}
           name='name'
           error={false}
@@ -61,7 +68,7 @@ function Register() {
         <Input
           type='email'
           placeholder='E-mail'
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
           value={email}
           name='email'
           error={false}
@@ -71,7 +78,7 @@ function Register() {
           autoComplete="email"
         />
         <PasswordInput
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
           value={password}
           name='password'
           extraClass="mb-6"

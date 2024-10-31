@@ -5,12 +5,12 @@ import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burg
 import { resetPasswordConfirm, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from "./styles.module.css";
 
-function ResetPassword() {
-  const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
+function ResetPassword(): JSX.Element {
+  const [password, setPassword] = useState<string>('');
+  const [token, setToken] = useState<string>('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isLoading, error, resetPasswordSuccess } = useSelector(state => state.auth);
+  const { isLoading, error, resetPasswordSuccess } = useSelector((state: any) => state.auth);
   const notification = useSelector(selectNotification);
 
   const checkFromForgotPassword = useCallback(() => {
@@ -37,14 +37,15 @@ function ResetPassword() {
     }
   }, [resetPasswordSuccess, navigate, dispatch]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!password || !token) {
       dispatch(setNotification('Пожалуйста, заполните все поля'));
       return;
     }
     try {
-      await dispatch(resetPasswordConfirm({ password, token })).unwrap();
+      //@ts-ignore
+      await dispatch(resetPasswordConfirm({ password, token }) as any).unwrap();
     } catch (error) {
       console.error('Password reset failed:', error);
       dispatch(setNotification('Ошибка при сбросе пароля. Попробуйте еще раз'));
@@ -57,7 +58,7 @@ function ResetPassword() {
       <form onSubmit={handleSubmit}>
         <PasswordInput
           placeholder='Введите новый пароль'
-          onChange={e => setPassword(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
           value={password}
           name='password'
           extraClass="mb-6"
@@ -66,7 +67,7 @@ function ResetPassword() {
         <Input
           type='text'
           placeholder='Введите код из письма'
-          onChange={e => setToken(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setToken(e.target.value)}
           value={token}
           name='token'
           error={false}
