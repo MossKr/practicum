@@ -44,9 +44,13 @@ export interface ApiResponse<T> {
 
 // Тип для заказа
 export interface Order {
-    number: number;
-    // другие поля заказа, если есть
-}
+    name: string;
+    order: {
+      number: number;
+    };
+    success: boolean;
+  }
+  
 
 // Типы для модального окна
 export interface ModalProps {
@@ -55,3 +59,20 @@ export interface ModalProps {
     onClose: () => void;
     children: React.ReactNode;
 }
+
+//
+export interface AuthResponse {
+    success: boolean;
+    accessToken: string;
+    refreshToken: string;
+    user: {
+      email: string;
+      name: string;
+    };
+  }
+  
+  export interface UserData {
+    email?: string;
+    name?: string;
+    password?: string;
+  }
