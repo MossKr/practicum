@@ -8,9 +8,7 @@ interface IngredientCategoryProps {
     items: Ingredient[];
     isVisible?: boolean;
     onIngredientClick: (item: Ingredient) => void;
-    ingredientCounts: {
-        [key: string]: number;
-    };
+    ingredientCounts: Record<string, number>;
 }
 
 const IngredientCategory: React.FC<IngredientCategoryProps> = React.memo(({
@@ -32,21 +30,17 @@ const IngredientCategory: React.FC<IngredientCategoryProps> = React.memo(({
             <ul className={`${styles.ingredientsList} ${styles.noListMarker}`}>
                 {items.map((item) => (
                     <li key={item._id}>
-                       <IngredientItem
+                        <IngredientItem
                             item={item}
                             onIngredientClick={onIngredientClick}
                             count={ingredientCounts[item._id] || 0}
-/>
-
+                        />
                     </li>
                 ))}
             </ul>
         </>
     );
 });
-
-
-
 
 IngredientCategory.displayName = 'IngredientCategory';
 

@@ -5,13 +5,12 @@ import IngredientDetails from '../components/burger-ingredients/details/ingredie
 import styles from './styles.module.css';
 import { Ingredient } from '../utils/typesTs';
 import { selectIngredients, selectIngredientsStatus } from "../services/ingredients/ingredientsSlice";
+import { RootState } from '../services/store';
 
 function IngredientPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
-  // @ts-ignore
-  const ingredients = useSelector(selectIngredients);
-  // @ts-ignore
-  const status = useSelector(selectIngredientsStatus);
+  const ingredients = useSelector((state: RootState) => selectIngredients(state));
+  const status = useSelector((state: RootState) => selectIngredientsStatus(state));
 
   if (status === "loading") {
     return <div>Загрузка...</div>;
@@ -28,7 +27,7 @@ function IngredientPage(): JSX.Element {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container}>ы
       <IngredientDetails item={ingredient} />
     </div>
   );

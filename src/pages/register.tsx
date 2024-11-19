@@ -4,21 +4,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import styles from "./styles.module.css";
 import { register, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
+import { AppDispatch, RootState } from '../services/store';
 
 function Register(): JSX.Element {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useSelector((state: any) => state.auth);
+  const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const notification = useSelector(selectNotification);
 
   useEffect(() => {
     return () => {
-      // @ts-ignore
       dispatch(clearError());
-      // @ts-ignore
       dispatch(setNotification(null));
     };
   }, [dispatch]);
@@ -31,20 +30,15 @@ function Register(): JSX.Element {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // @ts-ignore
     dispatch(clearError());
     if (!name || !email || !password) {
-      // @ts-ignore
       dispatch(setNotification('Пожалуйста, заполните все поля'));
       return;
     }
     try {
-      // @ts-ignore
       await dispatch(register({ email, password, name })).unwrap();
-      // @ts-ignore
       dispatch(setNotification('Регистрация прошла успешно'));
     } catch (error) {
-      // @ts-ignore
       dispatch(setNotification('Ошибка при регистрации. Пожалуйста, попробуйте еще раз'));
     }
   };

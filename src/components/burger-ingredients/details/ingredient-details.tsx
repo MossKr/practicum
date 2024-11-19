@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { selectIngredients, selectIngredientsStatus } from "../../../services/ingredients/ingredientsSlice";
 import { Ingredient } from "../../../utils/typesTs";
 import styles from "./details.module.css";
+import { RootState } from '../../../services/store';
 
 interface IngredientDetailsProps {
     item?: Ingredient;
@@ -16,10 +17,8 @@ interface DetailItem {
 
 const IngredientDetails: React.FC<IngredientDetailsProps> = React.memo(({ item: propItem }) => {
     const { id } = useParams<{ id: string }>();
-    // @ts-ignore
-    const ingredients = useSelector(selectIngredients);
-    // @ts-ignore
-    const status = useSelector(selectIngredientsStatus);
+    const ingredients = useSelector((state: RootState) => selectIngredients(state));
+    const status = useSelector((state: RootState) => selectIngredientsStatus(state));
 
     const item = useMemo(() => {
         if (propItem) return propItem;
@@ -64,7 +63,6 @@ const IngredientDetails: React.FC<IngredientDetailsProps> = React.memo(({ item: 
         </div>
     );
 });
-
 
 IngredientDetails.displayName = 'IngredientDetails';
 

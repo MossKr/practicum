@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Location } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Location, useParams } from 'react-router-dom';
 import { useDispatch } from "react-redux";
 import type { ThunkDispatch } from 'redux-thunk';
 import type { AnyAction } from 'redux';
@@ -8,6 +8,8 @@ import { fetchIngredients } from "../../services/ingredients/ingredientsSlice";
 import { checkAuth } from "../../services/auth/authSlice";
 import ProtectedRouteElement from "../protected-route";
 import Modal from "../common/modal/modal";
+import Feed from "../../pages/feed/feed";
+import OrderDetails from "../../pages/feed/order-details";
 
 import Home from "../../pages/home";
 import Login from "../../pages/login";
@@ -28,6 +30,11 @@ function App(): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
   const background = (location.state as LocationState)?.background;
+
+  const OrderDetailsWrapper = () => {
+    const { id } = useParams<{ id: string }>();
+    return <OrderDetails orderId={id} />;
+  };
 
   useEffect(() => {
     dispatch(fetchIngredients());
@@ -94,6 +101,18 @@ function App(): JSX.Element {
         />
         <Route path="/ingredients/:id" element={<IngredientPage />} />
         <Route path="*" element={<NotFound />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/feed/:id" element={<OrderDetailsWrapper />} />
+
+        <Route
+          path="/profile/orders/:id"
+          element={
+            <ProtectedRouteElement
+              element={<OrderDetailsWrapper />}
+              redirectPath="/login"
+            />
+         }
+       />
       </Routes>
 
       {background && (
@@ -106,6 +125,22 @@ function App(): JSX.Element {
               </Modal>
             }
           />
+          <Route
+             path="/feed/:id"
+             element={
+               <Modal isOpen={true} onClose={closeModal} title={' '}>
+                 <OrderDetailsWrapper />
+               </Modal>
+             }
+           />
+           <Route
+             path="/profile/orders/:id"
+             element={
+               <Modal isOpen={true} onClose={closeModal} title={' '}>
+                 <OrderDetailsWrapper />
+               </Modal>
+             }
+           />
         </Routes>
       )}
     </>

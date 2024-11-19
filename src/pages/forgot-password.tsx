@@ -4,12 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Input, Button } from '@ya.praktikum/react-developer-burger-ui-components';
 import { resetPassword, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from "./styles.module.css";
+import { AppDispatch, RootState } from '../services/store';
 
 function ForgotPassword(): JSX.Element {
   const [email, setEmail] = useState<string>('');
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { isLoading, error, resetPasswordRequestSuccess } = useSelector((state: any) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
+  const { isLoading, error, resetPasswordRequestSuccess } = useSelector((state: RootState) => state.auth);
   const notification = useSelector(selectNotification);
 
   const handleResetPasswordSuccess = useCallback(() => {
@@ -31,8 +32,7 @@ function ForgotPassword(): JSX.Element {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      //@ts-ignore
-      await dispatch(resetPassword(email) as any);
+      await dispatch(resetPassword(email)).unwrap();
     } catch (error) {
       console.error('Password reset request failed:', error);
       dispatch(setNotification('Не удалось отправить запрос на сброс пароля. Пожалуйста, попробуйте еще раз.'));

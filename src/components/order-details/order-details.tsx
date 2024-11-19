@@ -1,21 +1,33 @@
 import React, { useMemo } from "react";
 import { useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import styles from "./order-details.module.css";
 import img from "../../assets/images/check.svg";
 import Preloader from "../common/preloader/preloader";
+import { selectOrderNumber, selectOrderStatus, selectOrderError } from "../../services/order/orderSlice";
+import { RootState } from "../../services/store";
 
-interface OrderState {
-    orderNumber: number | null;
-    status: 'idle' | 'loading' | 'succeeded' | 'failed';
-    error: string | null;
+export interface Order {
+  id: string;
+  number: string;
+  name: string;
+  status: string;
+  ingredients: string[];
 }
 
-interface RootState {
-    order: OrderState;
+interface OrderDetailsProps {
+  isFullPage?: boolean;
+  order?: Order;
 }
 
-const OrderDetails: React.FC = () => {
-    const { orderNumber, status, error } = useSelector((state: RootState) => state.order);
+const OrderDetails: React.FC<OrderDetailsProps> = ({
+  isFullPage = false,
+  order
+}) => {
+    const { id } = useParams<{ id: string }>();
+    const orderNumber = useSelector((state: RootState) => selectOrderNumber(state));
+    const status = useSelector((state: RootState) => selectOrderStatus(state));
+    const error = useSelector((state: RootState) => selectOrderError(state));
 
     const content = useMemo(() => {
         switch (status) {
@@ -33,26 +45,46 @@ const OrderDetails: React.FC = () => {
                 );
             case "succeeded":
                 return (
-                    <div className={styles.modalBody}>
+                    <div className={`${styles.modalBody} ${isFullPage ? styles.fullPage : ''}`}>
+                        {isFullPage && <h1>Детали заказа</h1>}
                         <p className={`${styles.numberOrder} text text_type_digits-large`}>
-                            {orderNumber}
+                            {orderNumber || order?.number || id}
                         </p>
                         <p className="text text_type_main-medium mt-10">
-                            идентификатор заказа
+                            {isFullPage ? 'Номер заказа' : 'идентификатор заказа'}
                         </p>
-                        <img src={img} alt="Заказ принят" className="mt-10" />
-                        <p className="text text_type_main-default mt-10">
-                            Ваш заказ начали готовить
-                        </p>
-                        <p className="text text_type_main-default text_color_inactive mt-2">
-                            Дождитесь готовности на орбитальной станции
-                        </p>
+                        {!isFullPage && (
+                            <>
+                                <img src={img} alt="Заказ принят" className="mt-10" />
+                                <p className="text text_type_main-default mt-10">
+                                    Ваш заказ начали готовить
+                                </p>
+                                <p className="text text_type_main-default text_color_inactive mt-2">
+                                    Дождитесь готовности на орбитальной станции
+                                </p>
+                            </>
+                        )}
+                        {isFullPage && (
+                            <>
+                                <p className="text text_type_main-default mt-10">
+                                    Статус: {order?.status || 'Загрузка...'}
+                                </p>
+                                <div className="mt-10">
+                                    <p className="text text_type_main-medium">Состав:</p>
+                                    {order?.ingredients?.map((ingredient, index) => (
+                                        <p key={index} className="text text_type_main-default">
+                                            {ingredient}
+                                        </p>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                     </div>
                 );
             default:
                 return null;
         }
-    }, [status, orderNumber, error]);
+    }, [status, orderNumber, error, order, id, isFullPage]);
 
     return content;
 };

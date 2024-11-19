@@ -5,6 +5,7 @@ import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burg
 import styles from "./styles.module.css";
 import { login, clearError, clearIntendedPath, setNotification, selectNotification } from '../services/auth/authSlice';
 import { useFormAndValidation } from '../hooks/useFormAndValidation';
+import { AppDispatch, RootState } from '../services/store';
 
 interface LocationState {
   from?: string;
@@ -12,10 +13,10 @@ interface LocationState {
 
 function Login(): JSX.Element {
   const { values, handleChange, errors, isValid, resetForm, validateAll } = useFormAndValidation();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoading, error, isAuthenticated, intendedPath } = useSelector((state: any) => state.auth);
+  const { isLoading, error, isAuthenticated, intendedPath } = useSelector((state: RootState) => state.auth);
   const notification = useSelector(selectNotification);
 
   useEffect(() => {
@@ -41,15 +42,13 @@ function Login(): JSX.Element {
       return;
     }
     try {
-      //@ts-ignore
-      await dispatch(login({ email: values.email, password: values.password }) as any).unwrap();
+      await dispatch(login({ email: values.email, password: values.password })).unwrap();
       dispatch(setNotification('Вход выполнен успешно'));
       resetForm();
     } catch (error) {
       dispatch(setNotification('Ошибка при входе. Проверьте введенные данные'));
     }
   };
-
   return (
     <div className={styles.loginForm}>
       <h2 className="text text_type_main-medium mb-6">Вход</h2>
