@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppSelector, useAppDispatch } from "../hooks/redux";
 import { setIntendedPath } from '../services/auth/authSlice';
 
 interface ProtectedRouteElementProps {
@@ -11,8 +11,8 @@ interface ProtectedRouteElementProps {
 
 function ProtectedRouteElement({ element, allowAuthorized = true, redirectPath }: ProtectedRouteElementProps) {
   const location = useLocation();
-  const dispatch = useDispatch();
-  const { isAuthenticated, authChecked, intendedPath } = useSelector((state: any) => state.auth);
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, authChecked, intendedPath } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (allowAuthorized && !isAuthenticated && location.pathname !== '/login') {

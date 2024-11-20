@@ -1,11 +1,10 @@
 import React, { useMemo } from "react";
-import { useSelector } from "react-redux";
+import { useAppSelector } from "../../hooks/redux";
 import { useParams } from "react-router-dom";
 import styles from "./order-details.module.css";
 import img from "../../assets/images/check.svg";
 import Preloader from "../common/preloader/preloader";
 import { selectOrderNumber, selectOrderStatus, selectOrderError } from "../../services/order/orderSlice";
-import { RootState } from "../../services/store";
 
 export interface Order {
   id: string;
@@ -25,9 +24,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
   order
 }) => {
     const { id } = useParams<{ id: string }>();
-    const orderNumber = useSelector((state: RootState) => selectOrderNumber(state));
-    const status = useSelector((state: RootState) => selectOrderStatus(state));
-    const error = useSelector((state: RootState) => selectOrderError(state));
+    const orderNumber = useAppSelector((state) => selectOrderNumber(state));
+    const status = useAppSelector((state) => selectOrderStatus(state));
+    const error = useAppSelector((state) => selectOrderError(state));
 
     const content = useMemo(() => {
         switch (status) {

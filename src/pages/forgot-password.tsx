@@ -1,17 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from "../hooks/redux";
 import { Input, Button } from '@ya.praktikum/react-developer-burger-ui-components';
 import { resetPassword, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from "./styles.module.css";
-import { AppDispatch, RootState } from '../services/store';
 
 function ForgotPassword(): JSX.Element {
   const [email, setEmail] = useState<string>('');
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, error, resetPasswordRequestSuccess } = useSelector((state: RootState) => state.auth);
-  const notification = useSelector(selectNotification);
+  const dispatch = useAppDispatch();
+  const { isLoading, error, resetPasswordRequestSuccess } = useAppSelector((state) => state.auth);
+  const notification = useAppSelector(selectNotification);
 
   const handleResetPasswordSuccess = useCallback(() => {
     if (resetPasswordRequestSuccess) {

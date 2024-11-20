@@ -10,7 +10,7 @@ interface OrderState {
 }
 
 export const createOrder = createAsyncThunk<
-  OrderResponse,  
+  OrderResponse,
   string[],
   {
     rejectValue: string;
@@ -25,12 +25,12 @@ export const createOrder = createAsyncThunk<
 
     try {
       const response = await api.createOrder({ ingredients, token });
-      
-     
+
+
       if ('success' in response && 'order' in response) {
         return response as OrderResponse;
       }
-      
+
       throw new Error('Некорректный ответ от сервера');
     } catch (apiError: any) {
       if (apiError.message.includes('jwt')) {
@@ -45,11 +45,11 @@ export const createOrder = createAsyncThunk<
                 ingredients,
                 token: refreshData.accessToken
               });
-              
+
               if ('success' in response && 'order' in response) {
                 return response as OrderResponse;
               }
-              
+
               throw new Error('Некорректный ответ от сервера после обновления токена');
             }
           } catch (refreshError) {

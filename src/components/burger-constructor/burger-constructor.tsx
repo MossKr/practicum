@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConstructorElement, Button, CurrencyIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import { useDrop } from "react-dnd";
@@ -20,9 +20,6 @@ interface ConstructorState {
     ingredients: Ingredient[];
 }
 
-const useAppSelector = useSelector.withTypes<RootState>();
-const useAppDispatch = () => useDispatch<AppDispatch>();
-
 const BurgerConstructor: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -37,12 +34,6 @@ const BurgerConstructor: React.FC = () => {
     const orderError = useAppSelector(selectOrderError);
     const totalPrice = useAppSelector(selectTotalPrice);
     const isAuthenticated = useAppSelector(selectIsAuthenticated);
-
-    useEffect(() => {
-        if (status === "idle") {
-            dispatch(fetchIngredients());
-        }
-    }, [status, dispatch]);
 
     const [, dropTarget] = useDrop<Ingredient, void, {}>({
         accept: "ingredient",

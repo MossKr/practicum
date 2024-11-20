@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Location, useParams } from 'react-router-dom';
-import { useDispatch } from "react-redux";
+import { useAppDispatch } from "../../hooks/redux";
 import type { ThunkDispatch } from 'redux-thunk';
 import type { AnyAction } from 'redux';
 import AppHeader from "../app-header/app-header";
@@ -10,6 +10,7 @@ import ProtectedRouteElement from "../protected-route";
 import Modal from "../common/modal/modal";
 import Feed from "../../pages/feed/feed";
 import OrderDetails from "../../pages/feed/order-details";
+import OrderPage from "../../pages/feed/order-page";
 
 import Home from "../../pages/home";
 import Login from "../../pages/login";
@@ -26,7 +27,7 @@ interface LocationState {
 }
 
 function App(): JSX.Element {
-  const dispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const background = (location.state as LocationState)?.background;
@@ -102,13 +103,13 @@ function App(): JSX.Element {
         <Route path="/ingredients/:id" element={<IngredientPage />} />
         <Route path="*" element={<NotFound />} />
         <Route path="/feed" element={<Feed />} />
-        <Route path="/feed/:id" element={<OrderDetailsWrapper />} />
+        <Route path="/feed/:id" element={<OrderPage />} />
 
         <Route
           path="/profile/orders/:id"
           element={
             <ProtectedRouteElement
-              element={<OrderDetailsWrapper />}
+              element={<OrderPage />}
               redirectPath="/login"
             />
          }

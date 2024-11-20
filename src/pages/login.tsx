@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from "../hooks/redux";
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import styles from "./styles.module.css";
 import { login, clearError, clearIntendedPath, setNotification, selectNotification } from '../services/auth/authSlice';
 import { useFormAndValidation } from '../hooks/useFormAndValidation';
-import { AppDispatch, RootState } from '../services/store';
 
 interface LocationState {
   from?: string;
@@ -13,11 +12,11 @@ interface LocationState {
 
 function Login(): JSX.Element {
   const { values, handleChange, errors, isValid, resetForm, validateAll } = useFormAndValidation();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoading, error, isAuthenticated, intendedPath } = useSelector((state: RootState) => state.auth);
-  const notification = useSelector(selectNotification);
+  const { isLoading, error, isAuthenticated, intendedPath } = useAppSelector((state) => state.auth);
+  const notification = useAppSelector(selectNotification);
 
   useEffect(() => {
     if (isAuthenticated) {

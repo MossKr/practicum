@@ -1,16 +1,15 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from "../hooks/redux";
 import IngredientDetails from '../components/burger-ingredients/details/ingredient-details';
 import styles from './styles.module.css';
 import { Ingredient } from '../utils/typesTs';
 import { selectIngredients, selectIngredientsStatus } from "../services/ingredients/ingredientsSlice";
-import { RootState } from '../services/store';
 
 function IngredientPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
-  const ingredients = useSelector((state: RootState) => selectIngredients(state));
-  const status = useSelector((state: RootState) => selectIngredientsStatus(state));
+  const ingredients = useAppSelector((state) => selectIngredients(state));
+  const status = useAppSelector((state) => selectIngredientsStatus(state));
 
   if (status === "loading") {
     return <div>Загрузка...</div>;

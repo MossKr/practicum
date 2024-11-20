@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
+import { AppDispatch, RootState } from '../../services/store';
 
 export interface FeedOrder {
   ingredients: string[];

@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import {
@@ -22,20 +22,20 @@ import Preloader from '../../components/common/preloader/preloader';
 import { useIngredients, getIngredientById, calculateTotalPrice } from '../../utils/ingredients';
 
 const WEBSOCKET_URL = 'wss://norma.nomoreparties.space/orders';
-const LOADING_TIMEOUT = 5000; // 5 секунд
+const LOADING_TIMEOUT = 5000;
 
 const ProfileOrders: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const background = location.state?.background;
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const isAuthenticated = useSelector(selectIsAuthenticated);
-  const orders = useSelector(selectProfileOrders);
-  const connectionStatus = useSelector(selectProfileOrdersConnectionStatus);
-  const error = useSelector(selectProfileOrdersError);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const orders = useAppSelector(selectProfileOrders);
+  const connectionStatus = useAppSelector(selectProfileOrdersConnectionStatus);
+  const error = useAppSelector(selectProfileOrdersError);
   const ingredients = useIngredients();
 
   const hasConnected = useRef(false);

@@ -1,19 +1,18 @@
 import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import styles from "./styles.module.css";
 import { register, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
-import { AppDispatch, RootState } from '../services/store';
 
 function Register(): JSX.Element {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const notification = useSelector(selectNotification);
+  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const notification = useAppSelector(selectNotification);
 
   useEffect(() => {
     return () => {

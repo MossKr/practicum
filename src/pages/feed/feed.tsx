@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   CurrencyIcon,
@@ -33,17 +33,17 @@ interface FeedOrder {
 }
 
 const Feed: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
 
-  const orders = useSelector(selectFeedOrders);
-  const total = useSelector(selectFeedTotal);
-  const totalToday = useSelector(selectFeedTotalToday);
-  const connectionStatus = useSelector(selectFeedConnectionStatus);
-  const error = useSelector(selectFeedError);
-  const ingredients = useSelector(selectIngredients);
+  const orders = useAppSelector(selectFeedOrders);
+  const total = useAppSelector(selectFeedTotal);
+  const totalToday = useAppSelector(selectFeedTotalToday);
+  const connectionStatus = useAppSelector(selectFeedConnectionStatus);
+  const error = useAppSelector(selectFeedError);
+  const ingredients = useAppSelector(selectIngredients);
 
   useEffect(() => {
     dispatch(wsConnecting({ url: WEBSOCKET_URL }));

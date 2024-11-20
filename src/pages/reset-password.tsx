@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import { resetPasswordConfirm, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from "./styles.module.css";
-import { AppDispatch, RootState } from '../services/store';
+
 
 function ResetPassword(): JSX.Element {
   const [password, setPassword] = useState<string>('');
   const [token, setToken] = useState<string>('');
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, error, resetPasswordSuccess } = useSelector((state: RootState) => state.auth);
-  const notification = useSelector(selectNotification);
+  const dispatch = useAppDispatch();
+  const { isLoading, error, resetPasswordSuccess } = useAppSelector((state) => state.auth);
+  const notification = useAppSelector(selectNotification);
 
   const checkFromForgotPassword = useCallback(() => {
     const fromForgotPassword = localStorage.getItem('fromForgotPassword');

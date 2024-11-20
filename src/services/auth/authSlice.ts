@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 import api from '../../api/api';
-import { AppDispatch, RootState } from '../store';
+import { AppDispatch, RootState } from '../../services/store';
 
 const TOKEN_EXPIRY = 20 * 60 * 1000;
 
@@ -226,13 +226,10 @@ export const checkAuth = createAsyncThunk<
         return await dispatch(getUser()).unwrap();
       } catch (error) {
         try {
-          // Используем правильный вызов thunk
-          await dispatch(refreshToken()).unwrap();
 
-          // Если refreshToken успешен, пробуем получить пользователя
+          await dispatch(refreshToken()).unwrap();
           return await dispatch(getUser()).unwrap();
         } catch (refreshError) {
-          // Если обновление токена не удалось
           throw new Error('Unable to refresh token');
         }
       }
