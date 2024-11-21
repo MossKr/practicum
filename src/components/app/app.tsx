@@ -1,8 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, Location, useParams } from 'react-router-dom';
 import { useAppDispatch } from "../../hooks/redux";
-import type { ThunkDispatch } from 'redux-thunk';
-import type { AnyAction } from 'redux';
 import AppHeader from "../app-header/app-header";
 import { fetchIngredients } from "../../services/ingredients/ingredientsSlice";
 import { checkAuth } from "../../services/auth/authSlice";
@@ -30,7 +28,9 @@ function App(): JSX.Element {
   const dispatch = useAppDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-  const background = (location.state as LocationState)?.background;
+  const background = location.state && 'background' in location.state
+    ? (location.state as LocationState).background
+    : undefined;
 
   const OrderDetailsWrapper = () => {
     const { id } = useParams<{ id: string }>();
@@ -42,9 +42,17 @@ function App(): JSX.Element {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  const closeModal = (): void => {
-    navigate(-1);
-  };
+  const closeModal = useCallback((): void => {
+
+    if (background) {
+      navigate(background, {
+        replace: true,
+        state: { background: undefined }
+      });
+    } else {
+      navigate('/', { replace: true });
+    }
+  }, [navigate, background]);
 
   return (
     <>

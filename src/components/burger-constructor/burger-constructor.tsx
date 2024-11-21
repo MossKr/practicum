@@ -7,13 +7,12 @@ import styles from "./constructor.module.css";
 import Modal from "../common/modal/modal";
 import OrderDetails from "../order-details/order-details";
 import { useModal } from "../../hooks/useModal";
-import { fetchIngredients, selectIngredientsStatus } from "../../services/ingredients/ingredientsSlice";
 import { addIngredient, removeIngredient, moveIngredient, clearConstructor, selectBun, selectIngredients, selectTotalPrice } from "../../services/constructor/constructorSlice";
 import { createOrder, selectOrderStatus, selectOrderError, clearOrder } from "../../services/order/orderSlice";
 import Draggable from "./draggable-constructor";
 import { selectIsAuthenticated } from "../../services/auth/authSlice";
 import { Ingredient, ConstructorIngredient } from '../../utils/typesTs';
-import { RootState, AppDispatch } from '../../services/store';
+
 
 interface ConstructorState {
     bun: Ingredient | null;
@@ -26,7 +25,6 @@ const BurgerConstructor: React.FC = () => {
     const location = useLocation();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingProgress, setLoadingProgress] = useState<number>(0);
-    const status = useAppSelector(selectIngredientsStatus);
     const bun = useAppSelector(selectBun);
     const constructorIngredients = useAppSelector(selectIngredients);
     const { isModalOpen, openModal, closeModal } = useModal();
@@ -42,16 +40,26 @@ const BurgerConstructor: React.FC = () => {
         },
     });
     useEffect(() => {
-        if (isAuthenticated) {
-            const savedState = localStorage.getItem('constructorState');
-            if (savedState) {
+    if (isAuthenticated) {
+        const savedState = localStorage.getItem('constructorState');
+        if (savedState) {
+            try {
                 const { bun, ingredients } = JSON.parse(savedState) as ConstructorState;
-                if (bun) dispatch(addIngredient(bun));
-                ingredients.forEach(ingredient => dispatch(addIngredient(ingredient)));
+                dispatch(clearConstructor());
+                if (bun) {
+                    dispatch(addIngredient(bun));
+                }
+                ingredients.forEach(ingredient => {
+                    dispatch(addIngredient(ingredient));
+                });
+                localStorage.removeItem('constructorState');
+            } catch (error) {
+                console.error('Ошибка при восстановлении состояния конструктора:', error);
                 localStorage.removeItem('constructorState');
             }
         }
-    }, [isAuthenticated, dispatch]);
+    }
+}, [isAuthenticated, dispatch]);
 
     const simulateProgress = useCallback(() => {
         setLoadingProgress(0);
@@ -71,8 +79,11 @@ const BurgerConstructor: React.FC = () => {
         if (!isAuthenticated) {
             const currentState: ConstructorState = {
                 bun: bun,
-                ingredients: constructorIngredients
-            };
+                ingredients: constructorIngredients.map(ingredient => ({
+                ...ingredient,
+                uniqueId: undefined
+            }))
+        };
             localStorage.setItem('constructorState', JSON.stringify(currentState));
             navigate('/login', { state: { from: location.pathname } });
             return;
