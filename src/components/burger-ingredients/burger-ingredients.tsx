@@ -1,7 +1,7 @@
-import React, { useState, useRef, useMemo, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState, useRef, useMemo} from "react";
+import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { fetchIngredients, selectIngredients, selectIngredientsStatus, selectIngredientsError } from "../../services/ingredients/ingredientsSlice";
+import { selectIngredients, selectIngredientsStatus, selectIngredientsError } from "../../services/ingredients/ingredientsSlice";
 import { setCurrentIngredient } from "../../services/currentIngredient/currentIngredientSlice";
 import { selectConstructorItems } from "../../services/constructor/constructorSlice";
 import TabSort from "./tabs/tab-sort";
@@ -29,31 +29,21 @@ interface ConstructorItems {
 }
 
 function BurgerIngredients(): JSX.Element {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
 
-    // @ts-ignore - игнорируем типизацию для Redux
-    const ingredients = useSelector(selectIngredients);
-    // @ts-ignore
-    const status = useSelector(selectIngredientsStatus);
-    // @ts-ignore
-    const error = useSelector(selectIngredientsError);
-    // @ts-ignore
-    const constructorItems: ConstructorItems = useSelector(selectConstructorItems);
+
+    const ingredients = useAppSelector(selectIngredients);
+    const status = useAppSelector(selectIngredientsStatus);
+    const error = useAppSelector(selectIngredientsError);
+    const constructorItems: ConstructorItems = useAppSelector(selectConstructorItems);
 
     const [activeTab, setActiveTab] = useState<"buns" | "sauces" | "mains">("buns");
 
     const bunsRef = useRef<HTMLDivElement>(null);
     const saucesRef = useRef<HTMLDivElement>(null);
     const mainsRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (status === "idle") {
-            // @ts-ignore
-            dispatch(fetchIngredients());
-        }
-    }, [status, dispatch]);
 
     const categoriesIngredients = useMemo<CategorizedIngredients>(() => {
         if (!ingredients || ingredients.length === 0) {

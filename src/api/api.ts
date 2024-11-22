@@ -15,7 +15,7 @@ class Api {
     const err = await res.json();
     throw err;
   }
-  
+
 
   private _request(endpoint: string, options?: RequestInit): Promise<any> {
     return fetch(`${this.baseUrl}${endpoint}`, options).then(this._checkResponse);
@@ -48,7 +48,6 @@ class Api {
   }
 
  async login(email: string, password: string): Promise<AuthResponse> {
-  console.log('Attempting login with:', { email, password: '****' });
   const data = await this._request("/auth/login", {
     method: "POST",
     headers: {
@@ -57,18 +56,15 @@ class Api {
     body: JSON.stringify({ email, password }),
   });
 
-  console.log('Login response:', data);
   if (data.success && data.accessToken) {
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
-    console.log('Tokens saved to localStorage');
   } else {
-    console.error('Login successful but no tokens received');
   }
   return data;
 }
 
-  
+
   logout(token: string): Promise<{ success: boolean }> {
     return this._request("/auth/logout", {
       method: "POST",

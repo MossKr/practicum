@@ -1,9 +1,10 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, Routes, Route, useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from "../hooks/redux";
+import { NavLink, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Input, Button } from '@ya.praktikum/react-developer-burger-ui-components';
 import { getUser, updateUser, logout, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from './styles.module.css';
+import ProfileOrders from './profile/profile-orders';
 
 interface FormState {
   name: string;
@@ -31,10 +32,10 @@ const CustomInput: React.FC<CustomInputProps> = (props) => (
 );
 
 function ProfileForm(): JSX.Element {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { user, isLoading, error, isAuthenticated } = useSelector((state: any) => state.auth);
-  const notification = useSelector(selectNotification);
+  const { user, isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const notification = useAppSelector(selectNotification);
   const [form, setForm] = useState<FormState>({ name: '', email: '', password: '' });
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -70,7 +71,6 @@ function ProfileForm(): JSX.Element {
       updatedData.password = form.password;
     }
     try {
-       // @ts-ignore
       await dispatch(updateUser(updatedData) as any);
       dispatch(setNotification('Профиль успешно обновлен') as any);
       setIsEditing(false);
@@ -80,11 +80,14 @@ function ProfileForm(): JSX.Element {
   };
 
   const handleCancel = () => {
-    setForm({ name: user.name, email: user.email, password: '' });
-    setIsEditing(false);
+    if (user) {
+      setForm({ name: user.name, email: user.email, password: '' });
+      setIsEditing(false);
+    }
   };
 
-  if (isLoading) return <div className={styles.loading}>Загрузка...</div>;
+
+  if (isLoading) return <div className="text text_type_main-medium">Загрузка...</div>;
   if (error) return <div className={styles.error}>Ошибка: {error}</div>;
 
   return (
@@ -147,15 +150,27 @@ function ProfileForm(): JSX.Element {
 }
 
 function Profile(): JSX.Element {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state: any) => state.auth);
+  const location = useLocation();
+  const { isAuthenticated } = useAppSelector((state: any) => state.auth);
+  const [, setActiveTab] = useState<'profile' | 'orders'>('profile');
 
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(getUser() as any);
     }
   }, [dispatch, isAuthenticated]);
+
+
+  useEffect(() => {
+    if (location.pathname.includes('/orders')) {
+      setActiveTab('orders');
+    } else {
+      setActiveTab('profile');
+    }
+  }, [location]);
+
 
   const handleLogout = async () => {
     try {
@@ -209,7 +224,7 @@ function Profile(): JSX.Element {
       <div className={styles.contentContainer}>
         <Routes>
           <Route path="/" element={<ProfileForm />} />
-          <Route path="/orders" element={<div className="text text_type_main-medium">История заказов <p className="text text_type_main-default">(будет реализовано в следующем спринте)</p></div>} />
+          <Route path="orders" element={<ProfileOrders />} />
         </Routes>
       </div>
     </div>

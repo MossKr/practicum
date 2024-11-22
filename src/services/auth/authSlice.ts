@@ -1,148 +1,275 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import Cookies from 'js-cookie';
 import api from '../../api/api';
+import { AppDispatch, RootState } from '../../services/store';
 
 const TOKEN_EXPIRY = 20 * 60 * 1000;
 
-const setTokens = (accessToken, refreshToken) => {
+interface User {
+  email: string;
+  name: string;
+}
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  authChecked: boolean;
+  resetPasswordRequestSuccess: boolean;
+  resetPasswordSuccess: boolean;
+  error: string | null;
+  intendedPath: string | null;
+  notification: string | null;
+}
+
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface RegisterData extends LoginData {
+  name: string;
+}
+
+interface ResetPasswordConfirmData {
+  password: string;
+  token: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+  user?: User;
+}
+
+
+
+const setTokens = (accessToken: string, refreshToken: string): void => {
   Cookies.set('accessToken', accessToken, { expires: TOKEN_EXPIRY / (24 * 60 * 60 * 1000) });
   localStorage.setItem('refreshToken', refreshToken);
 };
 
-const clearTokens = () => {
+const clearTokens = (): void => {
   Cookies.remove('accessToken');
   localStorage.removeItem('refreshToken');
 };
 
-const createAsyncThunkWithTokens = (type, apiCall, options = {}) => {
-  return createAsyncThunk(type, async (arg, { rejectWithValue }) => {
-    const response = await apiCall(arg);
-    if (options.setTokens && response.accessToken && response.refreshToken) {
-      setTokens(response.accessToken, response.refreshToken);
+const createAsyncThunkWithTokens = <T, R>(
+  type: string,
+  apiCall: (arg: T) => Promise<ApiResponse>,
+  options: { setTokens?: boolean; clearTokens?: boolean; returnUser?: boolean } = {}
+) => {
+  return createAsyncThunk<R, T, { rejectValue: string }>(
+    type,
+    async (arg, { rejectWithValue }) => {
+      try {
+        const response = await apiCall(arg);
+        if (options.setTokens && response.accessToken && response.refreshToken) {
+          setTokens(response.accessToken, response.refreshToken);
+        }
+        if (options.clearTokens) {
+          clearTokens();
+        }
+        return (options.returnUser && response.user ? response.user : response) as R;
+      } catch (error) {
+        return rejectWithValue((error as Error).message);
+      }
     }
-    if (options.clearTokens) {
-      clearTokens();
-    }
-    return options.returnUser && response.user ? response.user : response;
-  });
+  );
 };
 
-export const register = createAsyncThunkWithTokens(
+export const register = createAsyncThunkWithTokens<RegisterData, User>(
   'auth/register',
   (data) => api.register(data.email, data.password, data.name),
   { setTokens: true, returnUser: true }
 );
 
-export const login = createAsyncThunkWithTokens(
+export const login = createAsyncThunkWithTokens<LoginData, User>(
   'auth/login',
   (data) => api.login(data.email, data.password),
   { setTokens: true, returnUser: true }
 );
 
-export const logout = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) throw new Error('Refresh token not found');
-  const response = await api.logout(refreshToken);
-  if (response.success) {
-    clearTokens();
-    dispatch(setIntendedPath('/profile'));
-  }
-  return response;
-});
-
-export const refreshToken = createAsyncThunk('auth/refreshToken', async () => {
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) throw new Error('Refresh token not found');
-  const response = await api.refreshToken(refreshToken);
-  if (response.success && response.accessToken && response.refreshToken) {
-    setTokens(response.accessToken, response.refreshToken);
-  }
-  return response;
-});
-
-export const getUser = createAsyncThunk('auth/getUser', async (_, { dispatch }) => {
-  let token = Cookies.get('accessToken');
-  if (!token) {
-    const result = await dispatch(refreshToken());
-    if (refreshToken.fulfilled.match(result)) {
-      token = Cookies.get('accessToken');
-    } else {
-      throw new Error('Unable to refresh token');
+export const logout = createAsyncThunk<ApiResponse, void, { state: RootState }>(
+  'auth/logout',
+  async (_, { dispatch }) => {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) throw new Error('Refresh token not found');
+    const response = await api.logout(refreshToken);
+    if (response.success) {
+      clearTokens();
+      dispatch(setIntendedPath('/profile'));
     }
+    return response;
   }
-  const response = await api.getUser(token);
-  return response.user;
-});
+);
 
-export const updateUser = createAsyncThunk('auth/updateUser', async (userData, { dispatch }) => {
-  let token = Cookies.get('accessToken');
-  if (!token) {
-    const result = await dispatch(refreshToken());
-    if (refreshToken.fulfilled.match(result)) {
-      token = Cookies.get('accessToken');
-    } else {
-      throw new Error('Unable to refresh token');
-    }
+export const refreshToken = createAsyncThunk<
+  ApiResponse,
+  void,
+  {
+    state: RootState;
+    rejectValue: string
   }
-  const response = await api.updateUser(token, userData);
-  return response.user;
-});
-
-export const resetPassword = createAsyncThunk('auth/resetPassword', async (email) => {
-  return await api.resetPassword(email);
-});
-
-export const resetPasswordConfirm = createAsyncThunk('auth/resetPasswordConfirm', async ({ password, token }) => {
-  return await api.resetPasswordConfirm(password, token);
-});
-
-export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { dispatch }) => {
-  const accessToken = Cookies.get('accessToken');
-  const refreshToken = localStorage.getItem('refreshToken');
-
-  if (accessToken && refreshToken) {
+>(
+  'auth/refreshToken',
+  async (_, { rejectWithValue }) => {
     try {
-      return await dispatch(getUser()).unwrap();
-    } catch (error) {
-      await dispatch(refreshToken()).unwrap();
-      return await dispatch(getUser()).unwrap();
-    }
-  } else {
-    throw new Error('No tokens found');
-  }
-});
+      const refreshTokenValue = localStorage.getItem('refreshToken');
+      if (!refreshTokenValue) throw new Error('Refresh token not found');
 
-export const checkTokens = () => ({
+      const response = await api.refreshToken(refreshTokenValue);
+
+      if (response.success && response.accessToken && response.refreshToken) {
+        setTokens(response.accessToken, response.refreshToken);
+        return response;
+      } else {
+        throw new Error('Invalid refresh token response');
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : 'Failed to refresh token'
+      );
+    }
+  }
+);
+
+
+export const getUser = createAsyncThunk<User, void, { state: RootState; rejectValue: string }>(
+  'auth/getUser',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      let token = Cookies.get('accessToken');
+      if (!token) {
+        const result = await dispatch(refreshToken());
+        if (refreshToken.fulfilled.match(result)) {
+          token = Cookies.get('accessToken');
+        } else {
+          throw new Error('Unable to refresh token');
+        }
+      }
+      if (!token) {
+        throw new Error('No access token available');
+      }
+      const response = await api.getUser(token);
+      if (!response.user || !response.user.email || !response.user.name) {
+        throw new Error('Invalid user data received');
+      }
+      return { email: response.user.email, name: response.user.name };
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to get user');
+    }
+  }
+);
+
+
+export const updateUser = createAsyncThunk<User, Partial<User>, { state: RootState; rejectValue: string }>(
+  'auth/updateUser',
+  async (userData, { dispatch, rejectWithValue }) => {
+    try {
+      let token = Cookies.get('accessToken');
+      if (!token) {
+        const result = await dispatch(refreshToken());
+        if (refreshToken.fulfilled.match(result)) {
+          token = Cookies.get('accessToken');
+        } else {
+          throw new Error('Unable to refresh token');
+        }
+      }
+      if (!token) {
+        throw new Error('No access token available');
+      }
+      const response = await api.updateUser(token, userData);
+      if (!response.user || !response.user.email || !response.user.name) {
+        throw new Error('Invalid user data received');
+      }
+      return { email: response.user.email, name: response.user.name };
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to update user');
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk<ApiResponse, string>(
+  'auth/resetPassword',
+  async (email) => {
+    return await api.resetPassword(email);
+  }
+);
+
+export const resetPasswordConfirm = createAsyncThunk<ApiResponse, ResetPasswordConfirmData>(
+  'auth/resetPasswordConfirm',
+  async ({ password, token }) => {
+    return await api.resetPasswordConfirm(password, token);
+  }
+);
+
+
+export const checkAuth = createAsyncThunk<
+  User,
+  void,
+  {
+    state: RootState;
+    dispatch: AppDispatch
+  }
+>(
+  'auth/checkAuth',
+  async (_, { dispatch }) => {
+    const accessToken = Cookies.get('accessToken');
+    const refreshTokenValue = localStorage.getItem('refreshToken');
+
+    if (accessToken && refreshTokenValue) {
+      try {
+        return await dispatch(getUser()).unwrap();
+      } catch (error) {
+        try {
+
+          await dispatch(refreshToken()).unwrap();
+          return await dispatch(getUser()).unwrap();
+        } catch (refreshError) {
+          throw new Error('Unable to refresh token');
+        }
+      }
+    } else {
+      throw new Error('No tokens found');
+    }
+  }
+);
+
+export const checkTokens = (): { accessToken: string | undefined; refreshToken: string | null } => ({
   accessToken: Cookies.get('accessToken'),
   refreshToken: localStorage.getItem('refreshToken')
 });
 
+const initialState: AuthState = {
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  authChecked: false,
+  resetPasswordRequestSuccess: false,
+  resetPasswordSuccess: false,
+  error: null,
+  intendedPath: null,
+  notification: null,
+};
+
 const authSlice = createSlice({
   name: 'auth',
-  initialState: {
-    user: null,
-    isAuthenticated: false,
-    isLoading: false,
-    authChecked: false,
-    resetPasswordRequestSuccess: false,
-    resetPasswordSuccess: false,
-    error: null,
-    intendedPath: null,
-    notification: null,
-  },
+  initialState,
   reducers: {
     clearError: (state) => { state.error = null; },
     clearResetPasswordSuccess: (state) => { state.resetPasswordSuccess = false; },
     clearResetPasswordRequestSuccess: (state) => { state.resetPasswordRequestSuccess = false; },
-    setIntendedPath: (state, action) => {
-      console.log('Setting intended path in reducer:', action.payload);
+    setIntendedPath: (state, action: PayloadAction<string>) => {
       state.intendedPath = action.payload;
     },
     clearIntendedPath: (state) => {
-      console.log('Clearing intended path in reducer');
       state.intendedPath = null;
     },
-    setNotification: (state, action) => {
+    setNotification: (state, action: PayloadAction<string | null>) => {
       state.notification = action.payload;
     },
   },
@@ -163,7 +290,7 @@ const authSlice = createSlice({
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload ?? null;
         if (action.payload === 'Email already exists') {
           state.notification = 'Пользователь с таким email уже существует';
         } else {
@@ -185,7 +312,7 @@ const authSlice = createSlice({
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.payload ?? null;
         if (action.payload === 'Invalid credentials') {
           state.notification = 'Неправильный логин или пароль';
         } else {
@@ -207,7 +334,7 @@ const authSlice = createSlice({
       })
       .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.error.message ?? null;
         state.notification = 'Ошибка при выходе из системы';
       })
       .addCase(getUser.pending, (state) => {
@@ -227,8 +354,8 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.authChecked = true;
-        state.error = action.payload;
-        if (action.payload === 'Token not found') {
+        state.error = action.error.message ?? null;
+        if (action.error.message === 'Token not found') {
           state.notification = 'Токен не найден. Пожалуйста, войдите снова';
         } else {
           state.notification = 'Ошибка при получении данных пользователя';
@@ -248,7 +375,7 @@ const authSlice = createSlice({
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.error.message ?? null;
         state.notification = 'Ошибка при обновлении данных пользователя';
       })
       .addCase(resetPassword.pending, (state) => {
@@ -264,7 +391,7 @@ const authSlice = createSlice({
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.error.message ?? null;
         state.notification = 'Ошибка при сбросе пароля. Попробуйте еще раз';
       })
       .addCase(resetPasswordConfirm.pending, (state) => {
@@ -281,7 +408,7 @@ const authSlice = createSlice({
       })
       .addCase(resetPasswordConfirm.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        state.error = action.error.message ?? null;
         state.notification = 'Ошибка при подтверждении нового пароля. Попробуйте еще раз';
       })
       .addCase(refreshToken.rejected, (state, action) => {
@@ -289,7 +416,7 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.authChecked = true;
-        state.error = action.payload;
+        state.error = action.error.message ?? null;
         state.notification = 'Сессия истекла. Пожалуйста, войдите снова';
         clearTokens();
       })
@@ -328,7 +455,6 @@ export const {
   setNotification,
 } = authSlice.actions;
 
-export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;
-export const selectNotification = (state) => state.auth.notification;
-
+export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+export const selectNotification = (state: RootState) => state.auth.notification;
 export default authSlice.reducer;

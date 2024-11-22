@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useDrag, useDrop } from "react-dnd";
+import { useDrag, useDrop, DropTargetMonitor } from "react-dnd";
 import { DragIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import styles from "./constructor.module.css";
 import { Ingredient, DragItem } from '../../utils/typesTs';
@@ -11,6 +11,7 @@ interface DraggableProps {
     handleRemove: () => void;
     children: React.ReactNode;
 }
+
 const Draggable: React.FC<DraggableProps> = ({ ingredient, index, moveIngredient, handleRemove, children }) => {
     const ref = useRef<HTMLDivElement>(null);
 
@@ -21,7 +22,7 @@ const Draggable: React.FC<DraggableProps> = ({ ingredient, index, moveIngredient
                 handlerId: monitor.getHandlerId(),
             };
         },
-        hover(item: DragItem, monitor) {
+        hover(item: DragItem, monitor: DropTargetMonitor) {
             if (!ref.current) {
                 return;
             }
@@ -55,9 +56,9 @@ const Draggable: React.FC<DraggableProps> = ({ ingredient, index, moveIngredient
         },
     });
 
-    const [{ isDragging }, drag] = useDrag<DragItem, void, { isDragging: boolean }>({
+    const [{ isDragging }, drag] = useDrag<DragItem, unknown, { isDragging: boolean }>({
         type: "constructorElement",
-        item: () => {
+        item: (): DragItem => {
             return { id: ingredient._id, index };
         },
         collect: (monitor) => ({

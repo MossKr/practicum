@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from "../hooks/redux";
 import IngredientDetails from '../components/burger-ingredients/details/ingredient-details';
 import styles from './styles.module.css';
 import { Ingredient } from '../utils/typesTs';
@@ -8,10 +8,8 @@ import { selectIngredients, selectIngredientsStatus } from "../services/ingredie
 
 function IngredientPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
-  // @ts-ignore
-  const ingredients = useSelector(selectIngredients);
-  // @ts-ignore
-  const status = useSelector(selectIngredientsStatus);
+  const ingredients = useAppSelector((state) => selectIngredients(state));
+  const status = useAppSelector((state) => selectIngredientsStatus(state));
 
   if (status === "loading") {
     return <div>Загрузка...</div>;
@@ -28,7 +26,7 @@ function IngredientPage(): JSX.Element {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container}>ы
       <IngredientDetails item={ingredient} />
     </div>
   );

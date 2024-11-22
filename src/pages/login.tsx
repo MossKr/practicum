@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppSelector, useAppDispatch } from "../hooks/redux";
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import styles from "./styles.module.css";
 import { login, clearError, clearIntendedPath, setNotification, selectNotification } from '../services/auth/authSlice';
@@ -12,11 +12,11 @@ interface LocationState {
 
 function Login(): JSX.Element {
   const { values, handleChange, errors, isValid, resetForm, validateAll } = useFormAndValidation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isLoading, error, isAuthenticated, intendedPath } = useSelector((state: any) => state.auth);
-  const notification = useSelector(selectNotification);
+  const { isLoading, error, isAuthenticated, intendedPath } = useAppSelector((state) => state.auth);
+  const notification = useAppSelector(selectNotification);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -41,15 +41,13 @@ function Login(): JSX.Element {
       return;
     }
     try {
-      //@ts-ignore
-      await dispatch(login({ email: values.email, password: values.password }) as any).unwrap();
+      await dispatch(login({ email: values.email, password: values.password })).unwrap();
       dispatch(setNotification('Вход выполнен успешно'));
       resetForm();
     } catch (error) {
       dispatch(setNotification('Ошибка при входе. Проверьте введенные данные'));
     }
   };
-
   return (
     <div className={styles.loginForm}>
       <h2 className="text text_type_main-medium mb-6">Вход</h2>

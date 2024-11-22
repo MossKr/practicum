@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import { Input, PasswordInput, Button } from '@ya.praktikum/react-developer-burger-ui-components'
 import { resetPasswordConfirm, clearError, setNotification, selectNotification } from '../services/auth/authSlice';
 import styles from "./styles.module.css";
+
 
 function ResetPassword(): JSX.Element {
   const [password, setPassword] = useState<string>('');
   const [token, setToken] = useState<string>('');
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { isLoading, error, resetPasswordSuccess } = useSelector((state: any) => state.auth);
-  const notification = useSelector(selectNotification);
+  const dispatch = useAppDispatch();
+  const { isLoading, error, resetPasswordSuccess } = useAppSelector((state) => state.auth);
+  const notification = useAppSelector(selectNotification);
 
   const checkFromForgotPassword = useCallback(() => {
     const fromForgotPassword = localStorage.getItem('fromForgotPassword');
@@ -44,10 +45,8 @@ function ResetPassword(): JSX.Element {
       return;
     }
     try {
-      //@ts-ignore
-      await dispatch(resetPasswordConfirm({ password, token }) as any).unwrap();
+      await dispatch(resetPasswordConfirm({ password, token })).unwrap();
     } catch (error) {
-      console.error('Password reset failed:', error);
       dispatch(setNotification('Ошибка при сбросе пароля. Попробуйте еще раз'));
     }
   };

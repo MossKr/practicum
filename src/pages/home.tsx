@@ -1,17 +1,19 @@
 import React from "react";
-import { useSelector } from 'react-redux';
+import { useAppSelector } from "../hooks/redux";
+import { selectIngredientsStatus, selectIngredientsError } from "../services/ingredients/ingredientsSlice";
 import styles from "./styles.module.css";
 import BurgerIngredients from "../components/burger-ingredients/burger-ingredients";
 import BurgerConstructor from "../components/burger-constructor/burger-constructor";
 
 function Home(): JSX.Element {
-    const { isLoading, error } = useSelector((state: any) => state.ingredients);
+    const status = useAppSelector(selectIngredientsStatus);
+    const error = useAppSelector(selectIngredientsError);
 
-    if (isLoading) {
+    if (status === 'loading') {
         return <div className={styles.loading}>Загрузка ингредиентов...</div>;
     }
 
-    if (error) {
+    if (status === 'failed') {
         return <div className={styles.error}>Ошибка: {error}</div>;
     }
 

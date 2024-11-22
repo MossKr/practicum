@@ -1,19 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useAppSelector, useAppDispatch } from "../../hooks/redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConstructorElement, Button, CurrencyIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import { useDrop } from "react-dnd";
-import { ThunkDispatch } from 'redux-thunk';
-import { AnyAction } from 'redux';
 import styles from "./constructor.module.css";
 import Modal from "../common/modal/modal";
 import OrderDetails from "../order-details/order-details";
 import { useModal } from "../../hooks/useModal";
-import { fetchIngredients, selectIngredientsStatus } from "../../services/ingredients/ingredientsSlice";
 import { addIngredient, removeIngredient, moveIngredient, clearConstructor, selectBun, selectIngredients, selectTotalPrice } from "../../services/constructor/constructorSlice";
-import { createOrder, selectOrderNumber, selectOrderStatus, selectOrderError, clearOrder } from "../../services/order/orderSlice";
+import { createOrder, selectOrderStatus, selectOrderError, clearOrder } from "../../services/order/orderSlice";
 import Draggable from "./draggable-constructor";
-import { selectIsAuthenticated} from "../../services/auth/authSlice";
+import { selectIsAuthenticated } from "../../services/auth/authSlice";
 import { Ingredient, ConstructorIngredient } from '../../utils/typesTs';
 
 
@@ -22,49 +19,47 @@ interface ConstructorState {
     ingredients: Ingredient[];
 }
 
-
-
-const BurgerConstructor = (): JSX.Element => {
-    const dispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
+const BurgerConstructor: React.FC = () => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [loadingProgress, setLoadingProgress] = useState<number>(0);
-    const status = useSelector(selectIngredientsStatus);
-    const bun = useSelector(selectBun);
-    const constructorIngredients = useSelector(selectIngredients);
+    const bun = useAppSelector(selectBun);
+    const constructorIngredients = useAppSelector(selectIngredients);
     const { isModalOpen, openModal, closeModal } = useModal();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const orderNumber = useSelector(selectOrderNumber);
-    const orderStatus = useSelector(selectOrderStatus);
-    const orderError = useSelector(selectOrderError);
-    const totalPrice = useSelector(selectTotalPrice);
-    const isAuthenticated = useSelector(selectIsAuthenticated);
+    const orderStatus = useAppSelector(selectOrderStatus);
+    const orderError = useAppSelector(selectOrderError);
+    const totalPrice = useAppSelector(selectTotalPrice);
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-    useEffect(() => {
-        if (status === "idle") {
-            dispatch(fetchIngredients());
-        }
-    }, [status, dispatch]);
-
-    const [, dropTarget] = useDrop({
+    const [, dropTarget] = useDrop<Ingredient, void, {}>({
         accept: "ingredient",
-        drop(item: Ingredient) {
+        drop(item) {
             dispatch(addIngredient(item));
         },
     });
-
     useEffect(() => {
-        if (isAuthenticated) {
-            const savedState = localStorage.getItem('constructorState');
-            if (savedState) {
+    if (isAuthenticated) {
+        const savedState = localStorage.getItem('constructorState');
+        if (savedState) {
+            try {
                 const { bun, ingredients } = JSON.parse(savedState) as ConstructorState;
-                if (bun) dispatch(addIngredient(bun));
-                ingredients.forEach(ingredient => dispatch(addIngredient(ingredient)));
+                dispatch(clearConstructor());
+                if (bun) {
+                    dispatch(addIngredient(bun));
+                }
+                ingredients.forEach(ingredient => {
+                    dispatch(addIngredient(ingredient));
+                });
+                localStorage.removeItem('constructorState');
+            } catch (error) {
+                console.error('Ошибка при восстановлении состояния конструктора:', error);
                 localStorage.removeItem('constructorState');
             }
         }
-    }, [isAuthenticated, dispatch]);
+    }
+}, [isAuthenticated, dispatch]);
 
     const simulateProgress = useCallback(() => {
         setLoadingProgress(0);
@@ -82,10 +77,13 @@ const BurgerConstructor = (): JSX.Element => {
 
     const handleOrderClick = useCallback(() => {
         if (!isAuthenticated) {
-            const currentState = {
+            const currentState: ConstructorState = {
                 bun: bun,
-                ingredients: constructorIngredients
-            };
+                ingredients: constructorIngredients.map(ingredient => ({
+                ...ingredient,
+                uniqueId: undefined
+            }))
+        };
             localStorage.setItem('constructorState', JSON.stringify(currentState));
             navigate('/login', { state: { from: location.pathname } });
             return;
@@ -102,18 +100,13 @@ const BurgerConstructor = (): JSX.Element => {
             openModal();
             const clearSimulation = simulateProgress();
 
-            // @ts-ignore
             dispatch(createOrder(ingredientIds))
                 .unwrap()
                 .then(() => {
                     setLoadingProgress(100);
                 })
-                .catch((err) => {
-                    // Проверяем, является ли err объектом и есть ли у него свойство message
-                    const errorMessage = err && typeof err === 'object' && 'message' in err
-                        ? err.message
-                        : 'Произошла неизвестная ошибка';
-
+                .catch((err: Error | string) => {
+                    const errorMessage = typeof err === 'object' ? err.message : err;
                     if (typeof errorMessage === 'string' && errorMessage.toLowerCase().includes('токен')) {
                         navigate('/login', { state: { from: location.pathname } });
                     } else {
@@ -136,8 +129,8 @@ const BurgerConstructor = (): JSX.Element => {
         openModal,
         closeModal,
         simulateProgress,
-        setLoadingProgress
     ]);
+
     useEffect(() => {
         if (orderStatus === 'failed') {
             closeModal();

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from "../../../hooks/redux";
 import { selectIngredients, selectIngredientsStatus } from "../../../services/ingredients/ingredientsSlice";
 import { Ingredient } from "../../../utils/typesTs";
 import styles from "./details.module.css";
@@ -16,10 +16,8 @@ interface DetailItem {
 
 const IngredientDetails: React.FC<IngredientDetailsProps> = React.memo(({ item: propItem }) => {
     const { id } = useParams<{ id: string }>();
-    // @ts-ignore
-    const ingredients = useSelector(selectIngredients);
-    // @ts-ignore
-    const status = useSelector(selectIngredientsStatus);
+    const ingredients = useAppSelector((state) => selectIngredients(state));
+    const status = useAppSelector((state) => selectIngredientsStatus(state));
 
     const item = useMemo(() => {
         if (propItem) return propItem;
@@ -64,7 +62,6 @@ const IngredientDetails: React.FC<IngredientDetailsProps> = React.memo(({ item: 
         </div>
     );
 });
-
 
 IngredientDetails.displayName = 'IngredientDetails';
 

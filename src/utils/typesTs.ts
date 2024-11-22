@@ -44,13 +44,28 @@ export interface ApiResponse<T> {
 
 // Тип для заказа
 export interface Order {
+  ingredients: Ingredient[];
+  _id: string;
+  owner: {
     name: string;
-    order: {
-      number: number;
-    };
-    success: boolean;
-  }
-  
+    email: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  status: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  number: number;
+  price: number;
+}
+
+export interface OrderResponse {
+  success: boolean;
+  name: string;
+  order: Order;
+}
+
 
 // Типы для модального окна
 export interface ModalProps {
@@ -70,7 +85,7 @@ export interface AuthResponse {
       name: string;
     };
   }
-  
+
   export interface UserData {
     email?: string;
     name?: string;

@@ -1,5 +1,5 @@
 import React from "react";
-import { useDispatch} from "react-redux";
+import { useAppDispatch } from "../../../hooks/redux";
 import { useDrag } from "react-dnd";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Ingredient } from "../../../utils/typesTs";
@@ -7,19 +7,16 @@ import { Counter, CurrencyIcon } from "@ya.praktikum/react-developer-burger-ui-c
 import styles from "../ingredients.module.css";
 import { setCurrentIngredient } from "../../../services/currentIngredient/currentIngredientSlice";
 
-
 interface IngredientItemProps {
     item: Ingredient;
     count: number;
     onIngredientClick: (item: Ingredient) => void;
 }
 
-function IngredientItem({ item, count, onIngredientClick }: IngredientItemProps): JSX.Element {
-    const dispatch = useDispatch();
+const IngredientItem: React.FC<IngredientItemProps> = ({ item, count, onIngredientClick }) => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-
-
 
     const [{ isDragging }, dragRef] = useDrag({
         type: "ingredient",
@@ -29,12 +26,11 @@ function IngredientItem({ item, count, onIngredientClick }: IngredientItemProps)
         }),
     });
 
-    function handleIngredientClick(): void {
-        // @ts-ignore
+    const handleIngredientClick = (): void => {
         dispatch(setCurrentIngredient(item));
         navigate(`/ingredients/${item._id}`, { state: { background: location } });
         onIngredientClick(item);
-    }
+    };
 
     return (
         <div
@@ -60,7 +56,6 @@ function IngredientItem({ item, count, onIngredientClick }: IngredientItemProps)
             </span>
         </div>
     );
-}
-
+};
 
 export default IngredientItem;

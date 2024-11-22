@@ -1,0 +1,7 @@
+.position {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  height: 100vh;
+  padding-top: 20px;
+}
