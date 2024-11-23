@@ -29,7 +29,7 @@ const IngredientCategory: React.FC<IngredientCategoryProps> = React.memo(({
             <h2 className={titleClassName}>{title}</h2>
             <ul className={`${styles.ingredientsList} ${styles.noListMarker}`}>
                 {items.map((item) => (
-                    <li key={item._id}>
+                    <li key={item._id} data-testid="ingredient-item">
                         <IngredientItem
                             item={item}
                             onIngredientClick={onIngredientClick}

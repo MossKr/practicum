@@ -4,6 +4,11 @@ import {
   AnyAction
 } from 'redux';
 
+export interface WsActionConfig {
+  type: string;
+  action: (payload: any) => AnyAction;
+}
+
 export interface WsActionTypes {
   wsConnecting: string;
   wsConnect: string;
@@ -17,10 +22,6 @@ export interface WsConnectionPayload {
   token?: string;
 }
 
-interface WsActionConfig {
-  type: string;
-  action: (payload: any) => AnyAction;
-}
 
 export const socketMiddleware = (
   wsActions: {

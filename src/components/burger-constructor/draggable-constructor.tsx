@@ -75,6 +75,7 @@ const Draggable: React.FC<DraggableProps> = ({ ingredient, index, moveIngredient
             style={{ opacity }}
             className={styles.draggableItem}
             data-handler-id={handlerId}
+            data-testid={`constructor-ingredient-${index}`}
         >
             <DragIcon type="primary" />
             {children}

@@ -168,7 +168,7 @@ const BurgerConstructor: React.FC = () => {
     const renderBun = useCallback(
         (type: "top" | "bottom") => {
             return bun ? (
-                <div className={styles.bunsAlign}>
+                <div className={styles.bunsAlign} data-testid={`constructor-bun-${type}`}>
                     <ConstructorElement
                         type={type}
                         isLocked={true}
@@ -178,7 +178,7 @@ const BurgerConstructor: React.FC = () => {
                     />
                 </div>
             ) : (
-                <div className={`${styles.emptyBun} ${styles.dropZone}`}>
+                <div className={`${styles.emptyBun} ${styles.dropZone}`} data-testid={`constructor-empty-bun-${type}`}>
                     <div className={styles.dropIcon}>+</div>
                     <div className="text text_type_main-small text_color_inactive">Перетащите булку</div>
                 </div>
@@ -188,39 +188,41 @@ const BurgerConstructor: React.FC = () => {
     );
 
     const renderIngredients = useMemo(() => {
-        if (isConstructorEmpty) {
-            return (
-                <div className={`${styles.emptyFilling} ${styles.dropZone}`}>
-                    <div className={styles.dropIcon}>+</div>
-                    <div className="text text_type_main-small text_color_inactive">Перетащите начинку</div>
-                </div>
-            );
-        }
-        return constructorIngredients.map((item: ConstructorIngredient, index: number) => (
-            <Draggable
-                key={item.uniqueId}
-                ingredient={item}
-                index={index}
-                handleRemove={() => handleRemove(item.uniqueId)}
-                moveIngredient={moveIngredientHandler}
-            >
-                <ConstructorElement
-                    text={item.name}
-                    price={item.price}
-                    thumbnail={item.image}
-                    handleClose={() => handleRemove(item.uniqueId)}
-                />
-            </Draggable>
-        ));
-    }, [constructorIngredients, handleRemove, moveIngredientHandler, isConstructorEmpty]);
+      if (isConstructorEmpty) {
+          return (
+              <div className={`${styles.emptyFilling} ${styles.dropZone}`} data-testid="constructor-empty-ingredients">
+                  <div className={styles.dropIcon}>+</div>
+                  <div className="text text_type_main-small text_color_inactive">Перетащите начинку</div>
+              </div>
+          );
+      }
+      return constructorIngredients.map((item: ConstructorIngredient, index: number) => (
+          <Draggable
+              key={item.uniqueId}
+              ingredient={item}
+              index={index}
+              handleRemove={() => handleRemove(item.uniqueId)}
+              moveIngredient={moveIngredientHandler}
+              data-testid={`constructor-ingredient-${index}`}
+          >
+              <ConstructorElement
+                  text={item.name}
+                  price={item.price}
+                  thumbnail={item.image}
+                  handleClose={() => handleRemove(item.uniqueId)}
+              />
+          </Draggable>
+      ));
+  }, [constructorIngredients, handleRemove, moveIngredientHandler, isConstructorEmpty]);
+
     return (
-        <div className={`pt-25 ${styles.mainContainer}`} ref={dropTarget}>
+        <div className={`pt-25 ${styles.mainContainer}`} ref={dropTarget} data-testid="constructor-dropzone">
             {renderBun("top")}
-            <div className={`${styles.fillContainer} ${styles.customScroll}`}>{renderIngredients}</div>
+            <div className={`${styles.fillContainer} ${styles.customScroll}`} data-testid="constructor-ingredient">{renderIngredients}</div>
             {renderBun("bottom")}
 
             <div className={styles.orderElements}>
-                <div className={`${styles.orderTotal} text text_type_digits-medium`}>
+                <div className={`${styles.orderTotal} text text_type_digits-medium`} data-testid="total-price">
                     {totalPrice}
                     <CurrencyIcon type="primary" />
                 </div>
@@ -232,6 +234,7 @@ const BurgerConstructor: React.FC = () => {
                         size="medium"
                         onClick={handleClearConstructor}
                         disabled={isConstructorEmpty}
+                        data-testid="clear-constructor"
                     >
                         Сбросить
                     </Button>
@@ -241,6 +244,7 @@ const BurgerConstructor: React.FC = () => {
                         size="medium"
                         onClick={handleOrderClick}
                         disabled={!bun || constructorIngredients.length === 0 || isLoading}
+                        data-testid="order-button"
                     >
                         {isLoading ? 'Оформление...' : 'Оформить заказ'}
                     </Button>
@@ -248,9 +252,9 @@ const BurgerConstructor: React.FC = () => {
             </div>
 
             {isModalOpen && (
-    <Modal title={" "} isOpen={isModalOpen} onClose={handleCloseModal}>
+    <Modal title={" "} isOpen={isModalOpen} onClose={handleCloseModal} data-testid="order-modal">
         {orderStatus === 'loading' || loadingProgress < 100 ? (
-            <div className={styles.loadingContainer}>
+            <div className={styles.loadingContainer} data-testid="order-loading">
                 <p className="text text_type_main-medium">Оформляем заказ...</p>
                 <div className={styles.progressBar}>
                     <div
@@ -261,7 +265,7 @@ const BurgerConstructor: React.FC = () => {
                 <p className="text text_type_main-small">{loadingProgress}%</p>
             </div>
         ) : (
-            <OrderDetails />
+            <OrderDetails data-testid="order-details"/>
         )}
     </Modal>
             )}

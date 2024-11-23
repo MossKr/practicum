@@ -37,7 +37,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "cypress:open": "cypress open",
+    "test:component": "cypress open --component",
+    "test:component:run": "cypress run --component"
   },
   "eslintConfig": {
     "extends": [
@@ -58,9 +61,13 @@
     ]
   },
   "devDependencies": {
+    "@4tw/cypress-drag-drop": "^2.2.5",
+    "@cypress/react": "^8.0.2",
+    "@cypress/webpack-dev-server": "^3.11.0",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "^18.3.12",
     "@types/uuid": "^10.0.0",
+    "cypress": "^13.16.0",
     "eslint-import-resolver-typescript": "^3.6.3"
   }
 }

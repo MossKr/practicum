@@ -51,6 +51,8 @@ const profileOrdersSlice = createSlice({
     wsDisconnect: (state) => {
       state.connectionStatus = 'disconnected';
       state.orders = [];
+      state.total = 0;
+      state.totalToday = 0; 
     },
     wsError: (state, action: PayloadAction<string>) => {
       state.connectionStatus = 'error';
