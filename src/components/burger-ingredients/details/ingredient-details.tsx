@@ -48,7 +48,7 @@ const IngredientDetails: React.FC<IngredientDetailsProps> = React.memo(({ item: 
     }
 
     return (
-        <div className={styles.modalBody}>
+        <div className={styles.modalBody} data-testid="ingredient-details">
             <img src={item.image_large} alt={item.name} className={styles.largeImg} />
             <h3 className={`text text_type_main-medium mt-4 mb-8 ${styles.itemName}`}>{item.name}</h3>
             <dl className={styles.details}>

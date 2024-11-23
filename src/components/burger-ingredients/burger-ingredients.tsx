@@ -90,37 +90,37 @@ function BurgerIngredients(): JSX.Element {
     }
 
     return (
-        <section>
-            <h1 className="text text_type_main-large pt-10 pb-5">Соберите бургер</h1>
-            <TabSort activeTab={activeTab} setActiveTab={handleTabClick} />
-            <div className={styles.customScroll}>
-                <div ref={bunsRef}>
-                    <IngredientCategory
-                        title="Булки"
-                        items={categoriesIngredients.buns}
-                        onIngredientClick={handleIngredientClick}
-                        ingredientCounts={ingredientCounts}
-                    />
-                </div>
-                <div ref={saucesRef}>
-                    <IngredientCategory
-                        title="Соусы"
-                        items={categoriesIngredients.sauces}
-                        onIngredientClick={handleIngredientClick}
-                        ingredientCounts={ingredientCounts}
-                    />
-                </div>
-                <div ref={mainsRef}>
-                    <IngredientCategory
-                        title="Начинки"
-                        items={categoriesIngredients.mains}
-                        onIngredientClick={handleIngredientClick}
-                        ingredientCounts={ingredientCounts}
-                    />
-                </div>
-            </div>
-        </section>
-    );
+    <section data-testid="ingredients-container">
+      <h1 className="text text_type_main-large pt-10 pb-5">Соберите бургер</h1>
+      <TabSort activeTab={activeTab} setActiveTab={handleTabClick} />
+      <div className={styles.customScroll}>
+        <div ref={bunsRef}>
+          <IngredientCategory
+            title="Булки"
+            items={categoriesIngredients.buns}
+            onIngredientClick={handleIngredientClick}
+            ingredientCounts={ingredientCounts}
+          />
+        </div>
+        <div ref={saucesRef}>
+          <IngredientCategory
+            title="Соусы"
+            items={categoriesIngredients.sauces}
+            onIngredientClick={handleIngredientClick}
+            ingredientCounts={ingredientCounts}
+          />
+        </div>
+        <div ref={mainsRef}>
+          <IngredientCategory
+            title="Начинки"
+            items={categoriesIngredients.mains}
+            onIngredientClick={handleIngredientClick}
+            ingredientCounts={ingredientCounts}
+          />
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default BurgerIngredients;

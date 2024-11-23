@@ -44,9 +44,9 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({
                 );
             case "succeeded":
                 return (
-                    <div className={`${styles.modalBody} ${isFullPage ? styles.fullPage : ''}`}>
+                    <div className={`${styles.modalBody} ${isFullPage ? styles.fullPage : ''}`} data-testid="order-details">
                         {isFullPage && <h1>Детали заказа</h1>}
-                        <p className={`${styles.numberOrder} text text_type_digits-large`}>
+                        <p className={`${styles.numberOrder} text text_type_digits-large`} data-testid="order-number">
                             {orderNumber || order?.number || id}
                         </p>
                         <p className="text text_type_main-medium mt-10">

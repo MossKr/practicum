@@ -26,7 +26,7 @@ function IngredientPage(): JSX.Element {
   }
 
   return (
-    <div className={styles.container}>ы
+    <div className={styles.container}>
       <IngredientDetails item={ingredient} />
     </div>
   );
